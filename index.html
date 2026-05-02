@@ -1,0 +1,1141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>FluxCompute — The Routing Layer for Agentic AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:       #100e0c;
+  --bg-1:     #161210;
+  --bg-2:     #1e1812;
+  --bg-3:     #26201a;
+  --line:     #2e2720;
+  --line-hi:  #3e352a;
+
+  --cream:    #f0e6cc;
+  --cream-2:  #c8b898;
+  --cream-3:  #8a7860;
+
+  --g:  #5fb04b;
+  --y:  #f5c518;
+  --o:  #f59022;
+  --r:  #d9352a;
+  --p:  #7d3f98;
+  --b:  #2c8ac9;
+  --bd: #1c6a9e;
+
+  --serif: "Source Serif 4", Georgia, serif;
+  --sans:  "DM Sans", system-ui, sans-serif;
+  --mono:  "DM Mono", monospace;
+
+  --max: 1280px;
+  --pad: clamp(1.5rem, 5vw, 5rem);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+html{scroll-behavior:smooth}
+
+body{
+  font-family:var(--sans);
+  background:var(--bg);
+  color:var(--cream);
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+
+/* ── GRID TEXTURE ── */
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:0;
+  background-image:
+    linear-gradient(to right, rgba(255,255,255,.028) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,.028) 1px, transparent 1px);
+  background-size:56px 56px;
+}
+
+/* ── RAINBOW STRIPE ── */
+.rainbow{display:flex;height:3px;width:100%;border-radius:2px;overflow:hidden}
+.rainbow s{flex:1;display:block}
+.rainbow s:nth-child(1){background:var(--g)}
+.rainbow s:nth-child(2){background:var(--y)}
+.rainbow s:nth-child(3){background:var(--o)}
+.rainbow s:nth-child(4){background:var(--r)}
+.rainbow s:nth-child(5){background:var(--p)}
+.rainbow s:nth-child(6){background:var(--b)}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.9rem var(--pad);
+  border-bottom:1px solid var(--line);
+  background:rgba(16,14,12,.82);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+}
+.nav-logo{display:flex;align-items:center;gap:.75rem;text-decoration:none}
+.logo-mark{
+  width:36px;height:36px;
+  flex-shrink:0;
+}
+.nav-wordmark{
+  font-family:var(--serif);
+  font-size:1.2rem;
+  font-weight:600;
+  color:var(--cream);
+  letter-spacing:-.01em;
+}
+.nav-links{display:flex;align-items:center;gap:2.2rem}
+.nav-links a{
+  font-size:.82rem;font-weight:400;
+  color:var(--cream-2);
+  text-decoration:none;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  transition:color .2s;
+}
+.nav-links a:hover{color:var(--cream)}
+.nav-ctas{display:flex;align-items:center;gap:.75rem}
+.btn-ghost{
+  padding:.5rem 1.2rem;
+  font-size:.82rem;font-weight:500;
+  color:var(--cream-2);
+  border:1px solid var(--line-hi);
+  border-radius:6px;
+  text-decoration:none;
+  transition:all .2s;
+  background:transparent;
+  cursor:pointer;
+  font-family:var(--sans);
+}
+.btn-ghost:hover{border-color:var(--cream-2);color:var(--cream)}
+.btn-solid{
+  padding:.5rem 1.3rem;
+  font-size:.82rem;font-weight:500;
+  color:#fff;
+  background:var(--bd);
+  border:1px solid var(--b);
+  border-radius:6px;
+  text-decoration:none;
+  transition:all .2s;
+  cursor:pointer;
+  font-family:var(--sans);
+}
+.btn-solid:hover{background:var(--b);box-shadow:0 0 20px rgba(44,138,201,.35)}
+
+/* ── SECTIONS ── */
+section{position:relative;z-index:1}
+.inner{max-width:var(--max);margin:0 auto;padding:0 var(--pad)}
+
+/* ── HERO ── */
+#hero{
+  min-height:100svh;
+  display:flex;flex-direction:column;
+  justify-content:flex-end;
+  padding-bottom:7rem;
+  padding-top:8rem;
+  overflow:hidden;
+}
+
+/* Decorative glow blobs */
+#hero::after{
+  content:"";
+  position:absolute;
+  width:700px;height:700px;
+  border-radius:50%;
+  background:radial-gradient(circle, rgba(44,138,201,.12) 0%, transparent 65%);
+  top:-100px;right:-150px;
+  pointer-events:none;
+  animation:drift 18s ease-in-out infinite alternate;
+}
+@keyframes drift{from{transform:translate(0,0) scale(1)}to{transform:translate(-60px,80px) scale(1.08)}}
+
+.hero-kicker{
+  font-family:var(--mono);
+  font-size:.72rem;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:var(--b);
+  margin-bottom:1.8rem;
+  display:flex;align-items:center;gap:.75rem;
+}
+.hero-kicker::before{
+  content:"";display:block;
+  width:28px;height:1px;background:var(--b);
+}
+
+.hero-h1{
+  font-family:var(--serif);
+  font-size:clamp(3rem, 7vw, 6.5rem);
+  font-weight:300;
+  line-height:1.04;
+  letter-spacing:-.03em;
+  color:var(--cream);
+  max-width:14ch;
+  margin-bottom:2.5rem;
+}
+.hero-h1 em{
+  font-style:italic;
+  color:var(--cream-2);
+}
+.hero-h1 .hl{color:var(--b)}
+
+.hero-sub{
+  font-size:1.05rem;
+  line-height:1.75;
+  color:var(--cream-2);
+  max-width:50ch;
+  margin-bottom:3rem;
+  font-weight:300;
+}
+
+.hero-actions{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:5rem}
+.hero-cta-primary{
+  display:inline-flex;align-items:center;gap:.5rem;
+  padding:.85rem 2rem;
+  font-size:.9rem;font-weight:500;
+  color:#fff;
+  background:var(--bd);
+  border:1px solid var(--b);
+  border-radius:8px;
+  text-decoration:none;
+  transition:all .25s;
+  cursor:pointer;
+  font-family:var(--sans);
+}
+.hero-cta-primary:hover{background:var(--b);box-shadow:0 0 40px rgba(44,138,201,.4)}
+.hero-cta-secondary{
+  display:inline-flex;align-items:center;gap:.5rem;
+  padding:.85rem 2rem;
+  font-size:.9rem;font-weight:400;
+  color:var(--cream-2);
+  border:1px solid var(--line-hi);
+  border-radius:8px;
+  text-decoration:none;
+  transition:all .25s;
+  cursor:pointer;
+  font-family:var(--sans);
+}
+.hero-cta-secondary:hover{border-color:var(--cream-2);color:var(--cream)}
+
+/* Hero ticker strip */
+.hero-ticker{
+  border-top:1px solid var(--line);
+  padding-top:2.5rem;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:2rem;
+}
+.ticker-item{}
+.ticker-num{
+  font-family:var(--serif);
+  font-size:clamp(2rem,4vw,3rem);
+  font-weight:300;
+  letter-spacing:-.03em;
+  color:var(--cream);
+  line-height:1;
+  margin-bottom:.4rem;
+}
+.ticker-label{
+  font-size:.75rem;
+  font-weight:400;
+  color:var(--cream-3);
+  letter-spacing:.06em;
+  text-transform:uppercase;
+}
+
+/* ── SEPARATOR ── */
+.sep{
+  height:1px;
+  background:linear-gradient(to right, transparent, var(--line-hi) 20%, var(--line-hi) 80%, transparent);
+  margin:0 var(--pad);
+}
+
+/* ── ADVANTAGE SECTION ── */
+#advantage{padding:7rem 0}
+.section-tag{
+  font-family:var(--mono);
+  font-size:.72rem;
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  color:var(--cream-3);
+  margin-bottom:1.2rem;
+}
+.section-h2{
+  font-family:var(--serif);
+  font-size:clamp(2rem,4vw,3.2rem);
+  font-weight:300;
+  line-height:1.15;
+  letter-spacing:-.025em;
+  color:var(--cream);
+  max-width:22ch;
+  margin-bottom:1.2rem;
+}
+.section-sub{
+  font-size:.95rem;
+  line-height:1.8;
+  color:var(--cream-2);
+  max-width:52ch;
+  font-weight:300;
+}
+
+.advantage-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:1.5px;
+  margin-top:5rem;
+  border:1.5px solid var(--line);
+  border-radius:12px;
+  overflow:hidden;
+}
+.adv-card{
+  background:var(--bg-1);
+  padding:2.5rem 2rem;
+  position:relative;
+  transition:background .3s;
+  cursor:default;
+}
+.adv-card::before{
+  content:"";
+  position:absolute;
+  top:0;left:0;right:0;
+  height:3px;
+  opacity:0;
+  transition:opacity .3s;
+}
+.adv-card:nth-child(1)::before{background:var(--g)}
+.adv-card:nth-child(2)::before{background:var(--o)}
+.adv-card:nth-child(3)::before{background:var(--b)}
+.adv-card:hover{background:var(--bg-2)}
+.adv-card:hover::before{opacity:1}
+
+.adv-icon{
+  width:44px;height:44px;
+  margin-bottom:1.5rem;
+  display:flex;align-items:center;justify-content:center;
+}
+.adv-card h3{
+  font-family:var(--serif);
+  font-size:1.3rem;
+  font-weight:400;
+  color:var(--cream);
+  margin-bottom:.8rem;
+  letter-spacing:-.01em;
+}
+.adv-card p{
+  font-size:.88rem;
+  line-height:1.8;
+  color:var(--cream-2);
+  font-weight:300;
+}
+
+/* ── METRICS BAND ── */
+#metrics{
+  padding:6rem 0;
+  background:var(--bg-1);
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+}
+.metrics-headline{
+  font-family:var(--serif);
+  font-size:clamp(1.6rem,3vw,2.4rem);
+  font-weight:300;
+  letter-spacing:-.02em;
+  color:var(--cream);
+  text-align:center;
+  max-width:40ch;
+  margin:0 auto 4rem;
+}
+.metrics-headline em{font-style:italic;color:var(--cream-2)}
+.metrics-row{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:2px;
+}
+.met{
+  padding:2.5rem 1.5rem;
+  text-align:center;
+  border-right:1px solid var(--line);
+}
+.met:last-child{border-right:none}
+.met-val{
+  font-family:var(--serif);
+  font-size:clamp(2.5rem,5vw,4rem);
+  font-weight:300;
+  letter-spacing:-.04em;
+  line-height:1;
+  margin-bottom:.6rem;
+}
+.met:nth-child(1) .met-val{color:var(--g)}
+.met:nth-child(2) .met-val{color:var(--b)}
+.met:nth-child(3) .met-val{color:var(--o)}
+.met:nth-child(4) .met-val{color:var(--p)}
+.met-lbl{
+  font-size:.78rem;
+  color:var(--cream-3);
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  font-weight:400;
+}
+
+/* ── PRODUCTS ── */
+#products{padding:7rem 0}
+.products-header{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:4rem;align-items:end;
+  margin-bottom:5rem;
+}
+.product-tabs{
+  display:flex;gap:.5rem;
+  border-bottom:1px solid var(--line);
+  padding-bottom:.75rem;
+  margin-bottom:3rem;
+}
+.ptab{
+  font-size:.8rem;font-weight:500;
+  letter-spacing:.06em;text-transform:uppercase;
+  color:var(--cream-3);
+  padding:.4rem .9rem;
+  border-radius:4px;
+  cursor:pointer;
+  transition:all .2s;
+  background:transparent;
+  border:none;
+  font-family:var(--sans);
+}
+.ptab.active,.ptab:hover{
+  color:var(--cream);
+  background:var(--bg-3);
+}
+
+.pipeline{
+  display:grid;
+  grid-template-rows:auto auto auto;
+  gap:2px;
+}
+.pipe-item{
+  background:var(--bg-1);
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:1.8rem 2rem;
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  gap:1.5rem;
+  align-items:center;
+  transition:all .3s;
+  cursor:default;
+}
+.pipe-item:hover{
+  background:var(--bg-2);
+  border-color:var(--line-hi);
+}
+.pipe-dot{
+  width:10px;height:10px;
+  border-radius:50%;
+  flex-shrink:0;
+}
+.pipe-item:nth-child(1) .pipe-dot{background:var(--g)}
+.pipe-item:nth-child(2) .pipe-dot{background:var(--b)}
+.pipe-item:nth-child(3) .pipe-dot{background:var(--o)}
+.pipe-item:nth-child(4) .pipe-dot{background:var(--p)}
+.pipe-label{
+  font-size:.72rem;
+  letter-spacing:.15em;
+  text-transform:uppercase;
+  color:var(--cream-3);
+  font-family:var(--mono);
+  white-space:nowrap;
+}
+.pipe-name{
+  font-family:var(--serif);
+  font-size:1.15rem;
+  font-weight:400;
+  color:var(--cream);
+  margin-bottom:.3rem;
+}
+.pipe-desc{
+  font-size:.84rem;
+  color:var(--cream-2);
+  line-height:1.6;
+  font-weight:300;
+}
+.pipe-badge{
+  font-size:.7rem;
+  font-family:var(--mono);
+  letter-spacing:.06em;
+  padding:.3rem .7rem;
+  border-radius:4px;
+  white-space:nowrap;
+}
+.pipe-item:nth-child(1) .pipe-badge{background:rgba(95,176,75,.12);color:var(--g);border:1px solid rgba(95,176,75,.2)}
+.pipe-item:nth-child(2) .pipe-badge{background:rgba(44,138,201,.12);color:var(--b);border:1px solid rgba(44,138,201,.2)}
+.pipe-item:nth-child(3) .pipe-badge{background:rgba(245,144,34,.12);color:var(--o);border:1px solid rgba(245,144,34,.2)}
+.pipe-item:nth-child(4) .pipe-badge{background:rgba(125,63,152,.12);color:var(--p);border:1px solid rgba(125,63,152,.2)}
+
+/* ── HOW IT WORKS ── */
+#how{
+  padding:7rem 0;
+  background:var(--bg-1);
+  border-top:1px solid var(--line);
+}
+.steps{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:3rem;
+  margin-top:5rem;
+}
+.step{position:relative}
+.step-num{
+  font-family:var(--mono);
+  font-size:.68rem;
+  letter-spacing:.18em;
+  color:var(--b);
+  text-transform:uppercase;
+  margin-bottom:1.2rem;
+  display:flex;align-items:center;gap:.6rem;
+}
+.step-num::after{
+  content:"";flex:1;
+  height:1px;background:var(--line);
+}
+.step h3{
+  font-family:var(--serif);
+  font-size:1.2rem;
+  font-weight:400;
+  color:var(--cream);
+  margin-bottom:.75rem;
+  letter-spacing:-.01em;
+}
+.step p{
+  font-size:.84rem;
+  line-height:1.8;
+  color:var(--cream-2);
+  font-weight:300;
+}
+
+/* ── TESTIMONIALS ── */
+#testimonials{padding:7rem 0}
+.testi-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:1.5px;
+  border:1.5px solid var(--line);
+  border-radius:12px;
+  overflow:hidden;
+  margin-top:4rem;
+}
+.testi{
+  background:var(--bg-1);
+  padding:2.5rem 2rem;
+  display:flex;
+  flex-direction:column;
+  gap:1.5rem;
+  transition:background .3s;
+}
+.testi:hover{background:var(--bg-2)}
+.testi-quote{
+  font-family:var(--serif);
+  font-size:1rem;
+  font-weight:300;
+  font-style:italic;
+  line-height:1.75;
+  color:var(--cream);
+  flex:1;
+}
+.testi-attr{
+  border-top:1px solid var(--line);
+  padding-top:1.2rem;
+}
+.testi-name{
+  font-size:.82rem;
+  font-weight:500;
+  color:var(--cream);
+  margin-bottom:.2rem;
+}
+.testi-co{
+  font-size:.75rem;
+  color:var(--cream-3);
+  letter-spacing:.04em;
+  font-family:var(--mono);
+}
+.testi-mark{
+  font-family:var(--serif);
+  font-size:3rem;
+  color:var(--line-hi);
+  line-height:1;
+  margin-bottom:-.5rem;
+}
+
+/* ── MODEL GRID ── */
+#models{
+  padding:7rem 0;
+  background:var(--bg-1);
+  border-top:1px solid var(--line);
+}
+.model-strip{
+  display:flex;
+  flex-wrap:wrap;
+  gap:1rem;
+  margin-top:3.5rem;
+}
+.model-chip{
+  display:flex;align-items:center;gap:.6rem;
+  padding:.6rem 1.1rem;
+  background:var(--bg-2);
+  border:1px solid var(--line);
+  border-radius:6px;
+  font-size:.8rem;
+  color:var(--cream-2);
+  cursor:default;
+  transition:all .2s;
+  font-family:var(--mono);
+}
+.model-chip:hover{
+  border-color:var(--line-hi);
+  color:var(--cream);
+  background:var(--bg-3);
+}
+.model-dot{
+  width:7px;height:7px;border-radius:50%;flex-shrink:0;
+}
+
+/* ── CTA FINALE ── */
+#cta-final{
+  padding:8rem 0;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+}
+#cta-final::before{
+  content:"";
+  position:absolute;
+  width:600px;height:600px;
+  border-radius:50%;
+  background:radial-gradient(circle, rgba(28,106,158,.15) 0%, transparent 70%);
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  pointer-events:none;
+}
+.cta-final-tag{
+  font-family:var(--mono);
+  font-size:.72rem;letter-spacing:.2em;
+  text-transform:uppercase;
+  color:var(--b);
+  margin-bottom:1.5rem;
+}
+.cta-final-h{
+  font-family:var(--serif);
+  font-size:clamp(2.5rem,5vw,4.5rem);
+  font-weight:300;
+  line-height:1.1;
+  letter-spacing:-.035em;
+  color:var(--cream);
+  max-width:20ch;
+  margin:0 auto 1.5rem;
+}
+.cta-final-sub{
+  font-size:1rem;
+  color:var(--cream-2);
+  max-width:48ch;
+  margin:0 auto 3rem;
+  line-height:1.75;
+  font-weight:300;
+}
+.cta-final-btns{
+  display:flex;align-items:center;justify-content:center;
+  gap:1rem;flex-wrap:wrap;
+  margin-bottom:4rem;
+}
+.cta-rainbow{max-width:400px;margin:0 auto}
+
+/* ── FOOTER ── */
+footer{
+  background:var(--bg-1);
+  border-top:1px solid var(--line);
+  padding:3.5rem var(--pad) 2.5rem;
+}
+.footer-top{
+  max-width:var(--max);
+  margin:0 auto;
+  display:grid;
+  grid-template-columns:2fr 1fr 1fr 1fr;
+  gap:3rem;
+  padding-bottom:3rem;
+  border-bottom:1px solid var(--line);
+  margin-bottom:2rem;
+}
+.footer-brand p{
+  font-size:.85rem;
+  color:var(--cream-3);
+  line-height:1.75;
+  margin-top:.75rem;
+  max-width:30ch;
+  font-weight:300;
+}
+.footer-col h5{
+  font-size:.72rem;
+  font-weight:500;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--cream-2);
+  margin-bottom:1rem;
+  font-family:var(--mono);
+}
+.footer-col a{
+  display:block;
+  font-size:.84rem;
+  color:var(--cream-3);
+  text-decoration:none;
+  margin-bottom:.6rem;
+  transition:color .2s;
+  font-weight:300;
+}
+.footer-col a:hover{color:var(--cream)}
+.footer-bottom{
+  max-width:var(--max);
+  margin:0 auto;
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:.75rem;
+  color:var(--cream-3);
+  font-family:var(--mono);
+  letter-spacing:.04em;
+}
+
+/* ── SCROLL REVEAL ── */
+.reveal{
+  opacity:0;
+  transform:translateY(28px);
+  transition:opacity .7s ease, transform .7s ease;
+}
+.reveal.visible{
+  opacity:1;
+  transform:translateY(0);
+}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .advantage-grid,.metrics-row,.steps,.testi-grid,.products-header{grid-template-columns:1fr}
+  .hero-ticker{grid-template-columns:repeat(2,1fr)}
+  .footer-top{grid-template-columns:1fr 1fr}
+  nav .nav-links{display:none}
+}
+@media(max-width:600px){
+  .hero-ticker{grid-template-columns:1fr 1fr}
+  .met{border-right:none;border-bottom:1px solid var(--line)}
+  .met:last-child{border-bottom:none}
+  .footer-top{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     NAV
+═══════════════════════════════════════════ -->
+<nav>
+  <a href="#" class="nav-logo">
+    <svg class="logo-mark" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Hex mesh mark — original, not Apple logo -->
+      <polygon points="18,3 31,10.5 31,25.5 18,33 5,25.5 5,10.5" fill="none" stroke="#2c8ac9" stroke-width="1.5"/>
+      <polygon points="18,9 25,13.5 25,22.5 18,27 11,22.5 11,13.5" fill="none" stroke="#7d3f98" stroke-width="1"/>
+      <circle cx="18" cy="18" r="3.5" fill="#2c8ac9"/>
+      <line x1="18" y1="3" x2="18" y2="9" stroke="#5fb04b" stroke-width="1"/>
+      <line x1="31" y1="10.5" x2="25" y2="13.5" stroke="#f59022" stroke-width="1"/>
+      <line x1="31" y1="25.5" x2="25" y2="22.5" stroke="#d9352a" stroke-width="1"/>
+      <line x1="18" y1="33" x2="18" y2="27" stroke="#7d3f98" stroke-width="1"/>
+      <line x1="5" y1="25.5" x2="11" y2="22.5" stroke="#2c8ac9" stroke-width="1"/>
+      <line x1="5" y1="10.5" x2="11" y2="13.5" stroke="#f5c518" stroke-width="1"/>
+    </svg>
+    <span class="nav-wordmark">FluxCompute</span>
+  </a>
+  <div class="nav-links">
+    <a href="#advantage">Advantage</a>
+    <a href="#products">Products</a>
+    <a href="#how">How It Works</a>
+    <a href="#models">Models</a>
+    <a href="#testimonials">Customers</a>
+  </div>
+  <div class="nav-ctas">
+    <a href="#" class="btn-ghost">Sign In</a>
+    <a href="#" class="btn-solid">Try Free</a>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════
+     HERO
+═══════════════════════════════════════════ -->
+<section id="hero">
+  <div class="inner">
+    <p class="hero-kicker">Agentic Infrastructure · May 2026</p>
+    <h1 class="hero-h1">
+      The <span class="hl">routing layer</span><br>
+      that makes agents<br>
+      <em>economically viable.</em>
+    </h1>
+    <p class="hero-sub">
+      FluxCompute sits between your application and the model graph — classifying, planning, routing, and auditing every inference call to maximize cost efficiency without sacrificing accuracy.
+    </p>
+    <div class="hero-actions">
+      <a href="#" class="hero-cta-primary">Start for Free →</a>
+      <a href="#" class="hero-cta-secondary">See How It Works</a>
+    </div>
+
+    <div class="hero-ticker">
+      <div class="ticker-item">
+        <div class="ticker-num">12.3×</div>
+        <div class="ticker-label">Cost reduction at iso-accuracy</div>
+      </div>
+      <div class="ticker-item">
+        <div class="ticker-num">&lt;30ms</div>
+        <div class="ticker-label">Routing overhead per turn</div>
+      </div>
+      <div class="ticker-item">
+        <div class="ticker-num">3.4×</div>
+        <div class="ticker-label">Lower energy footprint</div>
+      </div>
+      <div class="ticker-item">
+        <div class="ticker-num">&lt;1%</div>
+        <div class="ticker-label">Accuracy delta from baseline</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- ═══════════════════════════════════════════
+     ADVANTAGE
+═══════════════════════════════════════════ -->
+<section id="advantage">
+  <div class="inner">
+    <p class="section-tag reveal">Core advantage</p>
+    <h2 class="section-h2 reveal">Full ownership. Full-stack performance. Self-improving.</h2>
+    <p class="section-sub reveal">Most infrastructure platforms force you to choose between control and performance. FluxCompute delivers both — and compounds over time.</p>
+
+    <div class="advantage-grid reveal">
+      <div class="adv-card">
+        <div class="adv-icon">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+            <rect x="6" y="6" width="24" height="24" rx="4" stroke="#5fb04b" stroke-width="1.5"/>
+            <rect x="11" y="11" width="14" height="14" rx="2" fill="rgba(95,176,75,.15)" stroke="#5fb04b" stroke-width="1"/>
+            <path d="M16 18h4M18 16v4" stroke="#5fb04b" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3>Own Your Routing</h3>
+        <p>Your traffic, your models, your weights. Deploy in your VPC, on-prem, or hybrid. FluxCompute never touches your data — it only touches the decision layer.</p>
+      </div>
+      <div class="adv-card">
+        <div class="adv-icon">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+            <polyline points="6,26 12,16 18,20 24,10 30,14" stroke="#f59022" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+            <circle cx="6" cy="26" r="2" fill="#f59022"/>
+            <circle cx="30" cy="14" r="2" fill="#f59022"/>
+          </svg>
+        </div>
+        <h3>Full-Stack Optimization</h3>
+        <p>We tune from the query classifier down to GPU kernel scheduling. Not just prompt tweaks — every layer of the inference stack is in scope.</p>
+      </div>
+      <div class="adv-card">
+        <div class="adv-icon">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+            <path d="M18 6 L30 12 L30 24 L18 30 L6 24 L6 12 Z" stroke="#2c8ac9" stroke-width="1.5" fill="none"/>
+            <path d="M18 12 C18 12 22 16 22 18 C22 20 20 22 18 22 C16 22 14 20 14 18 C14 16 18 12 18 12Z" fill="rgba(44,138,201,.2)" stroke="#2c8ac9" stroke-width="1"/>
+            <path d="M18 30 L18 22M6 12 L14 16M30 12 L22 16" stroke="#2c8ac9" stroke-width="1" opacity=".6"/>
+          </svg>
+        </div>
+        <h3>Self-Improving Loop</h3>
+        <p>Every routed request sharpens the classifier. Telemetry feeds back into the routing model automatically — so performance compounds without manual tuning.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     METRICS BAND
+═══════════════════════════════════════════ -->
+<section id="metrics">
+  <div class="inner">
+    <p class="metrics-headline reveal">
+      Three outcomes, <em>one routing layer</em> — faster inference, stronger accuracy, dramatically lower cost.
+    </p>
+    <div class="metrics-row reveal">
+      <div class="met">
+        <div class="met-val">12.3×</div>
+        <div class="met-lbl">Cheaper at iso-accuracy</div>
+      </div>
+      <div class="met">
+        <div class="met-val">2.3×</div>
+        <div class="met-lbl">Faster end-to-end latency</div>
+      </div>
+      <div class="met">
+        <div class="met-val">3.4×</div>
+        <div class="met-lbl">Lower energy use</div>
+      </div>
+      <div class="met">
+        <div class="met-val">&lt;1%</div>
+        <div class="met-lbl">Accuracy loss vs baseline</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     PRODUCTS / PIPELINE
+═══════════════════════════════════════════ -->
+<section id="products">
+  <div class="inner">
+    <div class="products-header reveal">
+      <div>
+        <p class="section-tag">Product pipeline</p>
+        <h2 class="section-h2">From classification to audit — in under 30ms.</h2>
+      </div>
+      <p class="section-sub" style="margin-top:0">Four decisions per request. Each one optimized independently, executed together as a seamless routing brain.</p>
+    </div>
+
+    <div class="pipeline reveal">
+      <div class="pipe-item">
+        <div class="pipe-dot"></div>
+        <div>
+          <div class="pipe-name">FlexClassify</div>
+          <div class="pipe-desc">Categorizes incoming queries by complexity, domain, and cost sensitivity in under 12ms. The foundation of every routing decision.</div>
+        </div>
+        <div class="pipe-badge">12ms · GPU</div>
+      </div>
+      <div class="pipe-item">
+        <div class="pipe-dot"></div>
+        <div>
+          <div class="pipe-name">FlexPlan</div>
+          <div class="pipe-desc">Determines multi-step agent structure, tool use, and model tier selection. Constructs the execution graph before a single token is generated.</div>
+        </div>
+        <div class="pipe-badge">8ms · CPU</div>
+      </div>
+      <div class="pipe-item">
+        <div class="pipe-dot"></div>
+        <div>
+          <div class="pipe-name">FlexRoute</div>
+          <div class="pipe-desc">Executes the routing decision — dispatching to commercial API tiers or compressed on-prem models based on the plan output.</div>
+        </div>
+        <div class="pipe-badge">Inline · Zero copy</div>
+      </div>
+      <div class="pipe-item">
+        <div class="pipe-dot"></div>
+        <div>
+          <div class="pipe-name">FlexAudit</div>
+          <div class="pipe-desc">Async drift monitoring and telemetry loop. Feeds back into FlexClassify to improve routing accuracy with every production request.</div>
+        </div>
+        <div class="pipe-badge">Async · Continuous</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     HOW IT WORKS
+═══════════════════════════════════════════ -->
+<section id="how">
+  <div class="inner">
+    <p class="section-tag reveal">How it works</p>
+    <h2 class="section-h2 reveal">Connect once. Save immediately.</h2>
+
+    <div class="steps">
+      <div class="step reveal">
+        <div class="step-num">01</div>
+        <h3>Connect your models</h3>
+        <p>Drop in your API keys for OpenAI, Anthropic, or Google — or point us at your on-prem cluster. No migration, no refactoring.</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">02</div>
+        <h3>Run in shadow mode</h3>
+        <p>We mirror your live traffic, route in the background, and prove savings — before you commit to switching a single production request.</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">03</div>
+        <h3>Flip the switch</h3>
+        <p>When savings are proven, activate. FluxCompute becomes your inference layer — invisible to end users, decisive on your bill.</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">04</div>
+        <h3>Compound over time</h3>
+        <p>Telemetry sharpens the classifier. Every request improves the next routing decision. Your savings grow without additional work.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     MODEL GRID
+═══════════════════════════════════════════ -->
+<section id="models">
+  <div class="inner">
+    <p class="section-tag reveal">Supported models</p>
+    <h2 class="section-h2 reveal" style="max-width:30ch">Route across the full model landscape — commercial and open-source.</h2>
+    <p class="section-sub reveal">FluxCompute routes across every major provider and open-source family. Add new models in minutes via our unified adapter layer.</p>
+
+    <div class="model-strip reveal">
+      <div class="model-chip"><div class="model-dot" style="background:var(--g)"></div>GPT-4o</div>
+      <div class="model-chip"><div class="model-dot" style="background:var(--b)"></div>Claude 3.7 Sonnet</div>
+      <div class="model-chip"><div class="model-dot" style="background:var(--o)"></div>Gemini 2.5 Pro</div>
+      <div class="model-chip"><div class="model-dot" style="background:var(--p)"></div>Llama 3.3 70B</div>
+      <div class="model-chip"><div class="model-dot" style="background:var(--r)"></div>DeepSeek V3.1</div>
+      <div class="model-chip"><div class="model-dot" style="background:var(--y)"></div>Qwen3 235B</div>
+      <div class="model-chip"><div class="model-dot" style="background:var(--g)"></div>Mistral Large</div>
+      <div class="model-chip"><div class="model-dot" style="background:var(--b)"></div>Gemma 3 27B</div>
+      <div class="model-chip"><div class="model-dot" style="background:var(--o)"></div>Command R+</div>
+      <div class="model-chip"><div class="model-dot" style="background:var(--cream-3)"></div>+ your custom models</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     TESTIMONIALS
+═══════════════════════════════════════════ -->
+<section id="testimonials">
+  <div class="inner">
+    <p class="section-tag reveal">Customers</p>
+    <h2 class="section-h2 reveal">Trusted by teams paying real inference bills.</h2>
+
+    <div class="testi-grid reveal">
+      <div class="testi">
+        <div class="testi-mark">&ldquo;</div>
+        <p class="testi-quote">FluxCompute cut our monthly model spend by 8× on a customer support workload we thought was already optimized. The shadow mode gave us the confidence to flip the switch in under a week.</p>
+        <div class="testi-attr">
+          <div class="testi-name">Sarah K. · CTO</div>
+          <div class="testi-co">Series B SaaS · $120k/mo inference</div>
+        </div>
+      </div>
+      <div class="testi">
+        <div class="testi-mark">&ldquo;</div>
+        <p class="testi-quote">We're a regulated fintech — on-prem was non-negotiable. FluxCompute was the only routing layer that could work with our existing hardware without touching our data plane. Deployed in two days.</p>
+        <div class="testi-attr">
+          <div class="testi-name">Marcus D. · Head of AI</div>
+          <div class="testi-co">Enterprise Fintech · On-prem deployment</div>
+        </div>
+      </div>
+      <div class="testi">
+        <div class="testi-mark">&ldquo;</div>
+        <p class="testi-quote">The routing accuracy just keeps improving. Six months in, we're routing 40% more traffic to cheaper models than month one — with the same quality thresholds. It actually compounds.</p>
+        <div class="testi-attr">
+          <div class="testi-name">Priya L. · Engineering Lead</div>
+          <div class="testi-co">AI-native startup · 50M+ requests/day</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     CTA FINALE
+═══════════════════════════════════════════ -->
+<section id="cta-final">
+  <div class="inner">
+    <p class="cta-final-tag reveal">Start building today</p>
+    <h2 class="cta-final-h reveal">
+      The agentic economy needs a routing layer. That's us.
+    </h2>
+    <p class="cta-final-sub reveal">
+      Connect your first model in minutes. Prove savings in shadow mode. Keep ~20% of what we cut — we take a slice of the rest.
+    </p>
+    <div class="cta-final-btns reveal">
+      <a href="#" class="hero-cta-primary">Start for Free</a>
+      <a href="#" class="hero-cta-secondary">Talk to Us</a>
+    </div>
+    <div class="cta-rainbow reveal">
+      <div class="rainbow">
+        <s></s><s></s><s></s><s></s><s></s><s></s>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     FOOTER
+═══════════════════════════════════════════ -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <a href="#" class="nav-logo" style="display:inline-flex">
+        <svg class="logo-mark" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="18,3 31,10.5 31,25.5 18,33 5,25.5 5,10.5" fill="none" stroke="#2c8ac9" stroke-width="1.5"/>
+          <polygon points="18,9 25,13.5 25,22.5 18,27 11,22.5 11,13.5" fill="none" stroke="#7d3f98" stroke-width="1"/>
+          <circle cx="18" cy="18" r="3.5" fill="#2c8ac9"/>
+          <line x1="18" y1="3" x2="18" y2="9" stroke="#5fb04b" stroke-width="1"/>
+          <line x1="31" y1="10.5" x2="25" y2="13.5" stroke="#f59022" stroke-width="1"/>
+          <line x1="31" y1="25.5" x2="25" y2="22.5" stroke="#d9352a" stroke-width="1"/>
+          <line x1="18" y1="33" x2="18" y2="27" stroke="#7d3f98" stroke-width="1"/>
+          <line x1="5" y1="25.5" x2="11" y2="22.5" stroke="#2c8ac9" stroke-width="1"/>
+          <line x1="5" y1="10.5" x2="11" y2="13.5" stroke="#f5c518" stroke-width="1"/>
+        </svg>
+        <span class="nav-wordmark" style="margin-left:.5rem">FluxCompute</span>
+      </a>
+      <p>The routing layer that makes the agentic economy economically viable. We take 20% of what we cut.</p>
+    </div>
+    <div class="footer-col">
+      <h5>Product</h5>
+      <a href="#">FlexClassify</a>
+      <a href="#">FlexPlan</a>
+      <a href="#">FlexRoute</a>
+      <a href="#">FlexAudit</a>
+      <a href="#">Pricing</a>
+    </div>
+    <div class="footer-col">
+      <h5>Company</h5>
+      <a href="#">About</a>
+      <a href="#">Research</a>
+      <a href="#">Blog</a>
+      <a href="#">Careers</a>
+      <a href="#">Press</a>
+    </div>
+    <div class="footer-col">
+      <h5>Connect</h5>
+      <a href="#">Twitter / X</a>
+      <a href="#">GitHub</a>
+      <a href="#">LinkedIn</a>
+      <a href="#">Discord</a>
+      <a href="#">Status</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 FluxCompute, Inc.</span>
+    <span>Privacy · Terms · Security</span>
+  </div>
+</footer>
+
+<script>
+// Scroll reveal
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) {
+      // small stagger for sibling groups
+      const siblings = e.target.parentElement.querySelectorAll('.reveal');
+      let delay = 0;
+      siblings.forEach((s, idx) => { if (s === e.target) delay = idx * 80; });
+      setTimeout(() => {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }, delay);
+    }
+  });
+}, { threshold: 0.12 });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// Nav shrink on scroll
+const nav = document.querySelector('nav');
+window.addEventListener('scroll', () => {
+  if (window.scrollY > 60) {
+    nav.style.padding = '.6rem var(--pad)';
+  } else {
+    nav.style.padding = '.9rem var(--pad)';
+  }
+}, { passive: true });
+</script>
+</body>
+</html>
