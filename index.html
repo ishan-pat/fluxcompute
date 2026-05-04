@@ -1,1141 +1,740 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>FluxCompute — The Routing Layer for Agentic AI</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<title>FluxCompute — The compiler for agentic systems</title>
+<link rel="stylesheet" href="tokens.css"/>
 <style>
-:root {
-  --bg:       #100e0c;
-  --bg-1:     #161210;
-  --bg-2:     #1e1812;
-  --bg-3:     #26201a;
-  --line:     #2e2720;
-  --line-hi:  #3e352a;
+  body { padding: 0; }
+  a { color: inherit; text-decoration: none; }
 
-  --cream:    #f0e6cc;
-  --cream-2:  #c8b898;
-  --cream-3:  #8a7860;
+  /* Nav */
+  nav.top {
+    position: sticky; top: 0; z-index: 50;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: var(--s-4) var(--s-6);
+    background: color-mix(in oklch, var(--bg-0) 80%, transparent);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--line-1);
+  }
+  nav .left, nav .right, nav .center { display: flex; align-items: center; gap: var(--s-5); }
+  nav .center a { font-size: var(--text-sm); color: var(--fg-1); }
+  nav .center a:hover { color: var(--fg-0); }
+  nav .lockup { display: flex; align-items: center; gap: var(--s-3); }
+  nav .lockup .name { font: 600 var(--text-md)/1 var(--font-sans); letter-spacing: var(--tracking-tight); }
+  nav .lockup .name span { opacity: .65; font-weight: 500; }
+  @media (max-width: 880px) { nav .center { display: none; } }
 
-  --g:  #5fb04b;
-  --y:  #f5c518;
-  --o:  #f59022;
-  --r:  #d9352a;
-  --p:  #7d3f98;
-  --b:  #2c8ac9;
-  --bd: #1c6a9e;
+  /* Container */
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 var(--s-6); }
 
-  --serif: "Source Serif 4", Georgia, serif;
-  --sans:  "DM Sans", system-ui, sans-serif;
-  --mono:  "DM Mono", monospace;
+  /* === Hero === */
+  .hero {
+    position: relative;
+    padding: var(--s-10) 0 var(--s-9);
+    overflow: hidden;
+  }
+  .hero::before {
+    content: ""; position: absolute; inset: 0;
+    background-image: radial-gradient(circle at 1px 1px, var(--grid-dot) 1px, transparent 0);
+    background-size: 28px 28px;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, black 30%, transparent 75%);
+    pointer-events: none;
+  }
+  .hero::after {
+    content: ""; position: absolute; left: 50%; top: -200px; transform: translateX(-50%);
+    width: 1100px; height: 1100px;
+    background:
+      radial-gradient(circle at 30% 50%, oklch(78% 0.16 200 / 0.18) 0%, transparent 40%),
+      radial-gradient(circle at 70% 50%, oklch(62% 0.22 295 / 0.18) 0%, transparent 40%);
+    filter: blur(40px);
+    pointer-events: none; z-index: -1;
+  }
+  .hero .inner { position: relative; max-width: 880px; }
+  .hero .eyebrow {
+    display: inline-flex; gap: var(--s-2); align-items: center;
+    margin-bottom: var(--s-5);
+  }
+  .hero h1 {
+    margin: 0 0 var(--s-5);
+    font: 600 var(--text-4xl)/var(--leading-tight) var(--font-sans);
+    letter-spacing: var(--tracking-display);
+  }
+  .hero h1 .em { display: inline-block; }
+  .hero p.lede {
+    margin: 0 0 var(--s-7);
+    font-size: var(--text-md);
+    color: var(--fg-1);
+    line-height: var(--leading-body);
+    max-width: 580px;
+  }
+  .hero .cta { display: flex; gap: var(--s-3); align-items: center; flex-wrap: wrap; }
+  .hero .cta .hint {
+    font-family: var(--font-mono); font-size: var(--text-xs); color: var(--fg-2);
+    margin-left: var(--s-3);
+  }
+  .hero .cta .hint kbd {
+    font-family: var(--font-mono); font-size: 10px;
+    padding: 2px 6px;
+    border: 1px solid var(--line-2); border-radius: var(--r-1);
+    background: var(--bg-2); color: var(--fg-1);
+    margin: 0 2px;
+  }
 
-  --max: 1280px;
-  --pad: clamp(1.5rem, 5vw, 5rem);
-}
+  /* Hero terminal */
+  .terminal-wrap {
+    margin-top: var(--s-8);
+    position: relative;
+  }
+  .terminal {
+    background: var(--bg-1);
+    border: 1px solid var(--line-1);
+    border-radius: var(--r-4);
+    overflow: hidden;
+    box-shadow: var(--shadow-2);
+    position: relative;
+  }
+  .terminal::before {
+    content: ""; position: absolute; inset: -1px;
+    border-radius: var(--r-4);
+    background: var(--flux-gradient);
+    opacity: 0.18;
+    z-index: -1;
+    filter: blur(20px);
+  }
+  .terminal .bar {
+    display: flex; align-items: center; gap: var(--s-3);
+    padding: var(--s-3) var(--s-4);
+    border-bottom: 1px solid var(--line-1);
+    background: var(--bg-1);
+  }
+  .terminal .dots { display: flex; gap: 6px; }
+  .terminal .dots span { width: 10px; height: 10px; border-radius: 50%; background: var(--bg-3); }
+  .terminal .title {
+    font-family: var(--font-mono); font-size: var(--text-xs);
+    color: var(--fg-2); letter-spacing: var(--tracking-mono);
+  }
+  .terminal pre.code {
+    border: 0; border-radius: 0; margin: 0;
+    background: var(--bg-1);
+    padding: var(--s-5) var(--s-6);
+    font-size: var(--text-base);
+    line-height: 1.7;
+  }
+  .terminal .gutter {
+    display: inline-block; width: 24px;
+    color: var(--fg-3); user-select: none;
+    font-size: 11px;
+  }
+  .terminal .ok-line {
+    display: flex; gap: var(--s-3); align-items: center;
+    padding: var(--s-3) var(--s-6);
+    border-top: 1px solid var(--line-1);
+    background: oklch(72% 0.13 155 / 0.05);
+    font-family: var(--font-mono); font-size: var(--text-xs);
+    color: var(--fg-1);
+  }
+  .terminal .ok-line .ok { color: var(--status-ok); }
+  .terminal .ok-line .url { color: var(--flux-cyan); }
 
-*{box-sizing:border-box;margin:0;padding:0}
+  /* logo strip */
+  .strip {
+    margin-top: var(--s-9); padding-top: var(--s-6);
+    border-top: 1px solid var(--line-1);
+    display: flex; flex-wrap: wrap; gap: var(--s-7) var(--s-9);
+    align-items: center; justify-content: space-between;
+  }
+  .strip .lbl { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--fg-2); letter-spacing: var(--tracking-caps); text-transform: uppercase; }
+  .strip .marks { display: flex; gap: var(--s-7); flex-wrap: wrap; align-items: center; color: var(--fg-2); }
+  .strip .marks span { font: 500 var(--text-md)/1 var(--font-sans); letter-spacing: -0.02em; opacity: 0.7; }
 
-html{scroll-behavior:smooth}
+  /* === Section common === */
+  section.s {
+    padding: var(--s-10) 0;
+    border-top: 1px solid var(--line-1);
+  }
+  .s-head { display: grid; grid-template-columns: 1fr 1.4fr; gap: var(--s-7); margin-bottom: var(--s-8); }
+  .s-head .num { font-family: var(--font-mono); font-size: var(--text-xs); letter-spacing: var(--tracking-caps); text-transform: uppercase; color: var(--fg-2); margin-bottom: var(--s-2); }
+  .s-head h2 { margin: 0; font: 600 var(--text-3xl)/var(--leading-tight) var(--font-sans); letter-spacing: var(--tracking-display); }
+  .s-head p { margin: var(--s-3) 0 0; font-size: var(--text-md); color: var(--fg-1); max-width: 560px; }
+  @media (max-width: 880px) { .s-head { grid-template-columns: 1fr; } }
 
-body{
-  font-family:var(--sans);
-  background:var(--bg);
-  color:var(--cream);
-  -webkit-font-smoothing:antialiased;
-  overflow-x:hidden;
-}
+  /* === Features === */
+  .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-4); }
+  .feat {
+    background: var(--bg-1);
+    border: 1px solid var(--line-1);
+    border-radius: var(--r-4);
+    padding: var(--s-6);
+    display: flex; flex-direction: column; gap: var(--s-4);
+    min-height: 280px;
+    position: relative; overflow: hidden;
+  }
+  .feat .glyph {
+    width: 36px; height: 36px;
+    border-radius: var(--r-2);
+    background: var(--bg-2); border: 1px solid var(--line-2);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--flux-cyan);
+  }
+  .feat h3 { margin: 0; font: 600 var(--text-md)/1.3 var(--font-sans); letter-spacing: var(--tracking-tight); }
+  .feat p { margin: 0; font-size: var(--text-sm); color: var(--fg-1); line-height: 1.55; }
+  .feat .stat {
+    margin-top: auto;
+    padding-top: var(--s-4);
+    border-top: 1px solid var(--line-1);
+    display: flex; justify-content: space-between; align-items: baseline;
+  }
+  .feat .stat .k { font-family: var(--font-mono); font-size: 10px; color: var(--fg-2); letter-spacing: var(--tracking-caps); text-transform: uppercase; }
+  .feat .stat .v { font-family: var(--font-mono); font-size: var(--text-md); color: var(--fg-0); }
+  .feat .stat .v .unit { color: var(--fg-2); font-size: 11px; margin-left: 2px; }
+  @media (max-width: 880px) { .features { grid-template-columns: 1fr; } }
 
-/* ── GRID TEXTURE ── */
-body::before{
-  content:"";
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  z-index:0;
-  background-image:
-    linear-gradient(to right, rgba(255,255,255,.028) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255,255,255,.028) 1px, transparent 1px);
-  background-size:56px 56px;
-}
+  /* === Latency / showcase === */
+  .showcase {
+    display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-5);
+  }
+  .showcase .panel {
+    background: var(--bg-1); border: 1px solid var(--line-1);
+    border-radius: var(--r-4); padding: var(--s-6);
+  }
+  .panel-h {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: var(--s-5);
+  }
+  .panel-h h3 { margin: 0; font: 600 var(--text-md)/1.2 var(--font-sans); }
+  .panel-h .meta { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--fg-2); }
 
-/* ── RAINBOW STRIPE ── */
-.rainbow{display:flex;height:3px;width:100%;border-radius:2px;overflow:hidden}
-.rainbow s{flex:1;display:block}
-.rainbow s:nth-child(1){background:var(--g)}
-.rainbow s:nth-child(2){background:var(--y)}
-.rainbow s:nth-child(3){background:var(--o)}
-.rainbow s:nth-child(4){background:var(--r)}
-.rainbow s:nth-child(5){background:var(--p)}
-.rainbow s:nth-child(6){background:var(--b)}
+  /* Latency comparison bars */
+  .bars { display: grid; gap: var(--s-3); }
+  .bar-row { display: grid; grid-template-columns: 100px 1fr 80px; gap: var(--s-3); align-items: center; }
+  .bar-row .name { font-size: var(--text-sm); color: var(--fg-1); }
+  .bar-row .name.us { color: var(--fg-0); font-weight: 500; }
+  .bar-row .track {
+    height: 28px; background: var(--bg-2); border-radius: var(--r-2);
+    border: 1px solid var(--line-1); position: relative; overflow: hidden;
+  }
+  .bar-row .fill {
+    position: absolute; inset: 0 auto 0 0;
+    background: var(--bg-3);
+    border-radius: var(--r-2);
+  }
+  .bar-row.us .fill { background: var(--flux-gradient); }
+  .bar-row .val { font-family: var(--font-mono); font-size: var(--text-sm); color: var(--fg-1); text-align: right; }
+  .bar-row.us .val { color: var(--fg-0); }
 
-/* ── NAV ── */
-nav{
-  position:fixed;top:0;left:0;right:0;z-index:100;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:.9rem var(--pad);
-  border-bottom:1px solid var(--line);
-  background:rgba(16,14,12,.82);
-  backdrop-filter:blur(16px);
-  -webkit-backdrop-filter:blur(16px);
-}
-.nav-logo{display:flex;align-items:center;gap:.75rem;text-decoration:none}
-.logo-mark{
-  width:36px;height:36px;
-  flex-shrink:0;
-}
-.nav-wordmark{
-  font-family:var(--serif);
-  font-size:1.2rem;
-  font-weight:600;
-  color:var(--cream);
-  letter-spacing:-.01em;
-}
-.nav-links{display:flex;align-items:center;gap:2.2rem}
-.nav-links a{
-  font-size:.82rem;font-weight:400;
-  color:var(--cream-2);
-  text-decoration:none;
-  letter-spacing:.04em;
-  text-transform:uppercase;
-  transition:color .2s;
-}
-.nav-links a:hover{color:var(--cream)}
-.nav-ctas{display:flex;align-items:center;gap:.75rem}
-.btn-ghost{
-  padding:.5rem 1.2rem;
-  font-size:.82rem;font-weight:500;
-  color:var(--cream-2);
-  border:1px solid var(--line-hi);
-  border-radius:6px;
-  text-decoration:none;
-  transition:all .2s;
-  background:transparent;
-  cursor:pointer;
-  font-family:var(--sans);
-}
-.btn-ghost:hover{border-color:var(--cream-2);color:var(--cream)}
-.btn-solid{
-  padding:.5rem 1.3rem;
-  font-size:.82rem;font-weight:500;
-  color:#fff;
-  background:var(--bd);
-  border:1px solid var(--b);
-  border-radius:6px;
-  text-decoration:none;
-  transition:all .2s;
-  cursor:pointer;
-  font-family:var(--sans);
-}
-.btn-solid:hover{background:var(--b);box-shadow:0 0 20px rgba(44,138,201,.35)}
+  /* Live feed */
+  .feed { display: grid; gap: var(--s-2); font-family: var(--font-mono); font-size: var(--text-xs); }
+  .feed-row {
+    display: grid; grid-template-columns: 60px 70px 1fr auto; gap: var(--s-3);
+    padding: var(--s-2) var(--s-3);
+    border: 1px solid var(--line-1); border-radius: var(--r-2);
+    background: var(--bg-2);
+    align-items: center;
+  }
+  .feed-row .t { color: var(--fg-2); }
+  .feed-row .ms { color: var(--fg-0); }
+  .feed-row .ep { color: var(--flux-cyan); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .feed-row .st { font-size: 10px; }
+  @media (max-width: 880px) { .showcase { grid-template-columns: 1fr; } }
 
-/* ── SECTIONS ── */
-section{position:relative;z-index:1}
-.inner{max-width:var(--max);margin:0 auto;padding:0 var(--pad)}
+  /* === Pricing === */
+  .pricing { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-4); }
+  .price {
+    background: var(--bg-1); border: 1px solid var(--line-1);
+    border-radius: var(--r-4); padding: var(--s-6);
+    display: flex; flex-direction: column; gap: var(--s-4);
+    position: relative;
+  }
+  .price.featured {
+    border-color: transparent;
+    background:
+      linear-gradient(var(--bg-1), var(--bg-1)) padding-box,
+      var(--flux-gradient) border-box;
+    border: 1px solid transparent;
+  }
+  .price .tier { font-family: var(--font-mono); font-size: var(--text-xs); letter-spacing: var(--tracking-caps); text-transform: uppercase; color: var(--fg-2); }
+  .price.featured .tier { color: var(--flux-cyan); }
+  .price h3 { margin: 0; font: 600 var(--text-xl)/1.2 var(--font-sans); letter-spacing: var(--tracking-tight); }
+  .price .amt { display: flex; align-items: baseline; gap: var(--s-2); }
+  .price .amt .num { font: 600 var(--text-2xl)/1 var(--font-sans); letter-spacing: var(--tracking-display); }
+  .price .amt .unit { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--fg-2); }
+  .price ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s-3); flex: 1; }
+  .price ul li {
+    display: grid; grid-template-columns: 16px 1fr; gap: var(--s-3);
+    font-size: var(--text-sm); color: var(--fg-1);
+  }
+  .price ul li svg { color: var(--flux-cyan); margin-top: 4px; }
+  .price .btn { width: 100%; justify-content: center; }
+  @media (max-width: 880px) { .pricing { grid-template-columns: 1fr; } }
 
-/* ── HERO ── */
-#hero{
-  min-height:100svh;
-  display:flex;flex-direction:column;
-  justify-content:flex-end;
-  padding-bottom:7rem;
-  padding-top:8rem;
-  overflow:hidden;
-}
+  /* === CTA === */
+  .cta-final {
+    margin: var(--s-10) 0;
+    padding: var(--s-9) var(--s-7);
+    border-radius: var(--r-4);
+    border: 1px solid var(--line-1);
+    background:
+      linear-gradient(var(--bg-1), var(--bg-1)) padding-box,
+      var(--flux-gradient) border-box;
+    border: 1px solid transparent;
+    text-align: center;
+    position: relative; overflow: hidden;
+  }
+  .cta-final::before {
+    content: ""; position: absolute; inset: 0;
+    background-image: radial-gradient(circle at 1px 1px, var(--grid-dot) 1px, transparent 0);
+    background-size: 28px 28px;
+    mask-image: radial-gradient(ellipse 60% 80% at 50% 50%, black 0%, transparent 70%);
+  }
+  .cta-final h2 {
+    position: relative;
+    margin: 0 0 var(--s-3);
+    font: 600 var(--text-2xl)/var(--leading-tight) var(--font-sans);
+    letter-spacing: var(--tracking-display);
+  }
+  .cta-final p { position: relative; margin: 0 0 var(--s-6); color: var(--fg-1); }
+  .cta-final .row { position: relative; display: inline-flex; gap: var(--s-3); }
 
-/* Decorative glow blobs */
-#hero::after{
-  content:"";
-  position:absolute;
-  width:700px;height:700px;
-  border-radius:50%;
-  background:radial-gradient(circle, rgba(44,138,201,.12) 0%, transparent 65%);
-  top:-100px;right:-150px;
-  pointer-events:none;
-  animation:drift 18s ease-in-out infinite alternate;
-}
-@keyframes drift{from{transform:translate(0,0) scale(1)}to{transform:translate(-60px,80px) scale(1.08)}}
-
-.hero-kicker{
-  font-family:var(--mono);
-  font-size:.72rem;
-  letter-spacing:.22em;
-  text-transform:uppercase;
-  color:var(--b);
-  margin-bottom:1.8rem;
-  display:flex;align-items:center;gap:.75rem;
-}
-.hero-kicker::before{
-  content:"";display:block;
-  width:28px;height:1px;background:var(--b);
-}
-
-.hero-h1{
-  font-family:var(--serif);
-  font-size:clamp(3rem, 7vw, 6.5rem);
-  font-weight:300;
-  line-height:1.04;
-  letter-spacing:-.03em;
-  color:var(--cream);
-  max-width:14ch;
-  margin-bottom:2.5rem;
-}
-.hero-h1 em{
-  font-style:italic;
-  color:var(--cream-2);
-}
-.hero-h1 .hl{color:var(--b)}
-
-.hero-sub{
-  font-size:1.05rem;
-  line-height:1.75;
-  color:var(--cream-2);
-  max-width:50ch;
-  margin-bottom:3rem;
-  font-weight:300;
-}
-
-.hero-actions{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:5rem}
-.hero-cta-primary{
-  display:inline-flex;align-items:center;gap:.5rem;
-  padding:.85rem 2rem;
-  font-size:.9rem;font-weight:500;
-  color:#fff;
-  background:var(--bd);
-  border:1px solid var(--b);
-  border-radius:8px;
-  text-decoration:none;
-  transition:all .25s;
-  cursor:pointer;
-  font-family:var(--sans);
-}
-.hero-cta-primary:hover{background:var(--b);box-shadow:0 0 40px rgba(44,138,201,.4)}
-.hero-cta-secondary{
-  display:inline-flex;align-items:center;gap:.5rem;
-  padding:.85rem 2rem;
-  font-size:.9rem;font-weight:400;
-  color:var(--cream-2);
-  border:1px solid var(--line-hi);
-  border-radius:8px;
-  text-decoration:none;
-  transition:all .25s;
-  cursor:pointer;
-  font-family:var(--sans);
-}
-.hero-cta-secondary:hover{border-color:var(--cream-2);color:var(--cream)}
-
-/* Hero ticker strip */
-.hero-ticker{
-  border-top:1px solid var(--line);
-  padding-top:2.5rem;
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:2rem;
-}
-.ticker-item{}
-.ticker-num{
-  font-family:var(--serif);
-  font-size:clamp(2rem,4vw,3rem);
-  font-weight:300;
-  letter-spacing:-.03em;
-  color:var(--cream);
-  line-height:1;
-  margin-bottom:.4rem;
-}
-.ticker-label{
-  font-size:.75rem;
-  font-weight:400;
-  color:var(--cream-3);
-  letter-spacing:.06em;
-  text-transform:uppercase;
-}
-
-/* ── SEPARATOR ── */
-.sep{
-  height:1px;
-  background:linear-gradient(to right, transparent, var(--line-hi) 20%, var(--line-hi) 80%, transparent);
-  margin:0 var(--pad);
-}
-
-/* ── ADVANTAGE SECTION ── */
-#advantage{padding:7rem 0}
-.section-tag{
-  font-family:var(--mono);
-  font-size:.72rem;
-  letter-spacing:.2em;
-  text-transform:uppercase;
-  color:var(--cream-3);
-  margin-bottom:1.2rem;
-}
-.section-h2{
-  font-family:var(--serif);
-  font-size:clamp(2rem,4vw,3.2rem);
-  font-weight:300;
-  line-height:1.15;
-  letter-spacing:-.025em;
-  color:var(--cream);
-  max-width:22ch;
-  margin-bottom:1.2rem;
-}
-.section-sub{
-  font-size:.95rem;
-  line-height:1.8;
-  color:var(--cream-2);
-  max-width:52ch;
-  font-weight:300;
-}
-
-.advantage-grid{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:1.5px;
-  margin-top:5rem;
-  border:1.5px solid var(--line);
-  border-radius:12px;
-  overflow:hidden;
-}
-.adv-card{
-  background:var(--bg-1);
-  padding:2.5rem 2rem;
-  position:relative;
-  transition:background .3s;
-  cursor:default;
-}
-.adv-card::before{
-  content:"";
-  position:absolute;
-  top:0;left:0;right:0;
-  height:3px;
-  opacity:0;
-  transition:opacity .3s;
-}
-.adv-card:nth-child(1)::before{background:var(--g)}
-.adv-card:nth-child(2)::before{background:var(--o)}
-.adv-card:nth-child(3)::before{background:var(--b)}
-.adv-card:hover{background:var(--bg-2)}
-.adv-card:hover::before{opacity:1}
-
-.adv-icon{
-  width:44px;height:44px;
-  margin-bottom:1.5rem;
-  display:flex;align-items:center;justify-content:center;
-}
-.adv-card h3{
-  font-family:var(--serif);
-  font-size:1.3rem;
-  font-weight:400;
-  color:var(--cream);
-  margin-bottom:.8rem;
-  letter-spacing:-.01em;
-}
-.adv-card p{
-  font-size:.88rem;
-  line-height:1.8;
-  color:var(--cream-2);
-  font-weight:300;
-}
-
-/* ── METRICS BAND ── */
-#metrics{
-  padding:6rem 0;
-  background:var(--bg-1);
-  border-top:1px solid var(--line);
-  border-bottom:1px solid var(--line);
-}
-.metrics-headline{
-  font-family:var(--serif);
-  font-size:clamp(1.6rem,3vw,2.4rem);
-  font-weight:300;
-  letter-spacing:-.02em;
-  color:var(--cream);
-  text-align:center;
-  max-width:40ch;
-  margin:0 auto 4rem;
-}
-.metrics-headline em{font-style:italic;color:var(--cream-2)}
-.metrics-row{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:2px;
-}
-.met{
-  padding:2.5rem 1.5rem;
-  text-align:center;
-  border-right:1px solid var(--line);
-}
-.met:last-child{border-right:none}
-.met-val{
-  font-family:var(--serif);
-  font-size:clamp(2.5rem,5vw,4rem);
-  font-weight:300;
-  letter-spacing:-.04em;
-  line-height:1;
-  margin-bottom:.6rem;
-}
-.met:nth-child(1) .met-val{color:var(--g)}
-.met:nth-child(2) .met-val{color:var(--b)}
-.met:nth-child(3) .met-val{color:var(--o)}
-.met:nth-child(4) .met-val{color:var(--p)}
-.met-lbl{
-  font-size:.78rem;
-  color:var(--cream-3);
-  letter-spacing:.06em;
-  text-transform:uppercase;
-  font-weight:400;
-}
-
-/* ── PRODUCTS ── */
-#products{padding:7rem 0}
-.products-header{
-  display:grid;grid-template-columns:1fr 1fr;
-  gap:4rem;align-items:end;
-  margin-bottom:5rem;
-}
-.product-tabs{
-  display:flex;gap:.5rem;
-  border-bottom:1px solid var(--line);
-  padding-bottom:.75rem;
-  margin-bottom:3rem;
-}
-.ptab{
-  font-size:.8rem;font-weight:500;
-  letter-spacing:.06em;text-transform:uppercase;
-  color:var(--cream-3);
-  padding:.4rem .9rem;
-  border-radius:4px;
-  cursor:pointer;
-  transition:all .2s;
-  background:transparent;
-  border:none;
-  font-family:var(--sans);
-}
-.ptab.active,.ptab:hover{
-  color:var(--cream);
-  background:var(--bg-3);
-}
-
-.pipeline{
-  display:grid;
-  grid-template-rows:auto auto auto;
-  gap:2px;
-}
-.pipe-item{
-  background:var(--bg-1);
-  border:1px solid var(--line);
-  border-radius:8px;
-  padding:1.8rem 2rem;
-  display:grid;
-  grid-template-columns:auto 1fr auto;
-  gap:1.5rem;
-  align-items:center;
-  transition:all .3s;
-  cursor:default;
-}
-.pipe-item:hover{
-  background:var(--bg-2);
-  border-color:var(--line-hi);
-}
-.pipe-dot{
-  width:10px;height:10px;
-  border-radius:50%;
-  flex-shrink:0;
-}
-.pipe-item:nth-child(1) .pipe-dot{background:var(--g)}
-.pipe-item:nth-child(2) .pipe-dot{background:var(--b)}
-.pipe-item:nth-child(3) .pipe-dot{background:var(--o)}
-.pipe-item:nth-child(4) .pipe-dot{background:var(--p)}
-.pipe-label{
-  font-size:.72rem;
-  letter-spacing:.15em;
-  text-transform:uppercase;
-  color:var(--cream-3);
-  font-family:var(--mono);
-  white-space:nowrap;
-}
-.pipe-name{
-  font-family:var(--serif);
-  font-size:1.15rem;
-  font-weight:400;
-  color:var(--cream);
-  margin-bottom:.3rem;
-}
-.pipe-desc{
-  font-size:.84rem;
-  color:var(--cream-2);
-  line-height:1.6;
-  font-weight:300;
-}
-.pipe-badge{
-  font-size:.7rem;
-  font-family:var(--mono);
-  letter-spacing:.06em;
-  padding:.3rem .7rem;
-  border-radius:4px;
-  white-space:nowrap;
-}
-.pipe-item:nth-child(1) .pipe-badge{background:rgba(95,176,75,.12);color:var(--g);border:1px solid rgba(95,176,75,.2)}
-.pipe-item:nth-child(2) .pipe-badge{background:rgba(44,138,201,.12);color:var(--b);border:1px solid rgba(44,138,201,.2)}
-.pipe-item:nth-child(3) .pipe-badge{background:rgba(245,144,34,.12);color:var(--o);border:1px solid rgba(245,144,34,.2)}
-.pipe-item:nth-child(4) .pipe-badge{background:rgba(125,63,152,.12);color:var(--p);border:1px solid rgba(125,63,152,.2)}
-
-/* ── HOW IT WORKS ── */
-#how{
-  padding:7rem 0;
-  background:var(--bg-1);
-  border-top:1px solid var(--line);
-}
-.steps{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:3rem;
-  margin-top:5rem;
-}
-.step{position:relative}
-.step-num{
-  font-family:var(--mono);
-  font-size:.68rem;
-  letter-spacing:.18em;
-  color:var(--b);
-  text-transform:uppercase;
-  margin-bottom:1.2rem;
-  display:flex;align-items:center;gap:.6rem;
-}
-.step-num::after{
-  content:"";flex:1;
-  height:1px;background:var(--line);
-}
-.step h3{
-  font-family:var(--serif);
-  font-size:1.2rem;
-  font-weight:400;
-  color:var(--cream);
-  margin-bottom:.75rem;
-  letter-spacing:-.01em;
-}
-.step p{
-  font-size:.84rem;
-  line-height:1.8;
-  color:var(--cream-2);
-  font-weight:300;
-}
-
-/* ── TESTIMONIALS ── */
-#testimonials{padding:7rem 0}
-.testi-grid{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:1.5px;
-  border:1.5px solid var(--line);
-  border-radius:12px;
-  overflow:hidden;
-  margin-top:4rem;
-}
-.testi{
-  background:var(--bg-1);
-  padding:2.5rem 2rem;
-  display:flex;
-  flex-direction:column;
-  gap:1.5rem;
-  transition:background .3s;
-}
-.testi:hover{background:var(--bg-2)}
-.testi-quote{
-  font-family:var(--serif);
-  font-size:1rem;
-  font-weight:300;
-  font-style:italic;
-  line-height:1.75;
-  color:var(--cream);
-  flex:1;
-}
-.testi-attr{
-  border-top:1px solid var(--line);
-  padding-top:1.2rem;
-}
-.testi-name{
-  font-size:.82rem;
-  font-weight:500;
-  color:var(--cream);
-  margin-bottom:.2rem;
-}
-.testi-co{
-  font-size:.75rem;
-  color:var(--cream-3);
-  letter-spacing:.04em;
-  font-family:var(--mono);
-}
-.testi-mark{
-  font-family:var(--serif);
-  font-size:3rem;
-  color:var(--line-hi);
-  line-height:1;
-  margin-bottom:-.5rem;
-}
-
-/* ── MODEL GRID ── */
-#models{
-  padding:7rem 0;
-  background:var(--bg-1);
-  border-top:1px solid var(--line);
-}
-.model-strip{
-  display:flex;
-  flex-wrap:wrap;
-  gap:1rem;
-  margin-top:3.5rem;
-}
-.model-chip{
-  display:flex;align-items:center;gap:.6rem;
-  padding:.6rem 1.1rem;
-  background:var(--bg-2);
-  border:1px solid var(--line);
-  border-radius:6px;
-  font-size:.8rem;
-  color:var(--cream-2);
-  cursor:default;
-  transition:all .2s;
-  font-family:var(--mono);
-}
-.model-chip:hover{
-  border-color:var(--line-hi);
-  color:var(--cream);
-  background:var(--bg-3);
-}
-.model-dot{
-  width:7px;height:7px;border-radius:50%;flex-shrink:0;
-}
-
-/* ── CTA FINALE ── */
-#cta-final{
-  padding:8rem 0;
-  text-align:center;
-  position:relative;
-  overflow:hidden;
-}
-#cta-final::before{
-  content:"";
-  position:absolute;
-  width:600px;height:600px;
-  border-radius:50%;
-  background:radial-gradient(circle, rgba(28,106,158,.15) 0%, transparent 70%);
-  top:50%;left:50%;
-  transform:translate(-50%,-50%);
-  pointer-events:none;
-}
-.cta-final-tag{
-  font-family:var(--mono);
-  font-size:.72rem;letter-spacing:.2em;
-  text-transform:uppercase;
-  color:var(--b);
-  margin-bottom:1.5rem;
-}
-.cta-final-h{
-  font-family:var(--serif);
-  font-size:clamp(2.5rem,5vw,4.5rem);
-  font-weight:300;
-  line-height:1.1;
-  letter-spacing:-.035em;
-  color:var(--cream);
-  max-width:20ch;
-  margin:0 auto 1.5rem;
-}
-.cta-final-sub{
-  font-size:1rem;
-  color:var(--cream-2);
-  max-width:48ch;
-  margin:0 auto 3rem;
-  line-height:1.75;
-  font-weight:300;
-}
-.cta-final-btns{
-  display:flex;align-items:center;justify-content:center;
-  gap:1rem;flex-wrap:wrap;
-  margin-bottom:4rem;
-}
-.cta-rainbow{max-width:400px;margin:0 auto}
-
-/* ── FOOTER ── */
-footer{
-  background:var(--bg-1);
-  border-top:1px solid var(--line);
-  padding:3.5rem var(--pad) 2.5rem;
-}
-.footer-top{
-  max-width:var(--max);
-  margin:0 auto;
-  display:grid;
-  grid-template-columns:2fr 1fr 1fr 1fr;
-  gap:3rem;
-  padding-bottom:3rem;
-  border-bottom:1px solid var(--line);
-  margin-bottom:2rem;
-}
-.footer-brand p{
-  font-size:.85rem;
-  color:var(--cream-3);
-  line-height:1.75;
-  margin-top:.75rem;
-  max-width:30ch;
-  font-weight:300;
-}
-.footer-col h5{
-  font-size:.72rem;
-  font-weight:500;
-  letter-spacing:.14em;
-  text-transform:uppercase;
-  color:var(--cream-2);
-  margin-bottom:1rem;
-  font-family:var(--mono);
-}
-.footer-col a{
-  display:block;
-  font-size:.84rem;
-  color:var(--cream-3);
-  text-decoration:none;
-  margin-bottom:.6rem;
-  transition:color .2s;
-  font-weight:300;
-}
-.footer-col a:hover{color:var(--cream)}
-.footer-bottom{
-  max-width:var(--max);
-  margin:0 auto;
-  display:flex;justify-content:space-between;align-items:center;
-  font-size:.75rem;
-  color:var(--cream-3);
-  font-family:var(--mono);
-  letter-spacing:.04em;
-}
-
-/* ── SCROLL REVEAL ── */
-.reveal{
-  opacity:0;
-  transform:translateY(28px);
-  transition:opacity .7s ease, transform .7s ease;
-}
-.reveal.visible{
-  opacity:1;
-  transform:translateY(0);
-}
-
-/* ── RESPONSIVE ── */
-@media(max-width:900px){
-  .advantage-grid,.metrics-row,.steps,.testi-grid,.products-header{grid-template-columns:1fr}
-  .hero-ticker{grid-template-columns:repeat(2,1fr)}
-  .footer-top{grid-template-columns:1fr 1fr}
-  nav .nav-links{display:none}
-}
-@media(max-width:600px){
-  .hero-ticker{grid-template-columns:1fr 1fr}
-  .met{border-right:none;border-bottom:1px solid var(--line)}
-  .met:last-child{border-bottom:none}
-  .footer-top{grid-template-columns:1fr}
-}
+  /* Footer */
+  footer {
+    border-top: 1px solid var(--line-1);
+    padding: var(--s-7) 0 var(--s-6);
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: var(--s-7);
+  }
+  footer h4 { font: 500 var(--text-xs)/1 var(--font-sans); letter-spacing: var(--tracking-caps); text-transform: uppercase; color: var(--fg-2); margin: 0 0 var(--s-4); }
+  footer ul { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--s-3); }
+  footer ul a { font-size: var(--text-sm); color: var(--fg-1); }
+  footer ul a:hover { color: var(--fg-0); }
+  footer .meta { color: var(--fg-2); font-size: var(--text-sm); max-width: 280px; line-height: 1.5; margin-top: var(--s-4); }
+  footer .copy {
+    grid-column: 1 / -1; display: flex; justify-content: space-between;
+    border-top: 1px solid var(--line-1); padding-top: var(--s-5); margin-top: var(--s-5);
+    font-family: var(--font-mono); font-size: var(--text-xs); color: var(--fg-2);
+  }
+  @media (max-width: 880px) { footer { grid-template-columns: 1fr 1fr; } }
 </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════
-     NAV
-═══════════════════════════════════════════ -->
-<nav>
-  <a href="#" class="nav-logo">
-    <svg class="logo-mark" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- Hex mesh mark — original, not Apple logo -->
-      <polygon points="18,3 31,10.5 31,25.5 18,33 5,25.5 5,10.5" fill="none" stroke="#2c8ac9" stroke-width="1.5"/>
-      <polygon points="18,9 25,13.5 25,22.5 18,27 11,22.5 11,13.5" fill="none" stroke="#7d3f98" stroke-width="1"/>
-      <circle cx="18" cy="18" r="3.5" fill="#2c8ac9"/>
-      <line x1="18" y1="3" x2="18" y2="9" stroke="#5fb04b" stroke-width="1"/>
-      <line x1="31" y1="10.5" x2="25" y2="13.5" stroke="#f59022" stroke-width="1"/>
-      <line x1="31" y1="25.5" x2="25" y2="22.5" stroke="#d9352a" stroke-width="1"/>
-      <line x1="18" y1="33" x2="18" y2="27" stroke="#7d3f98" stroke-width="1"/>
-      <line x1="5" y1="25.5" x2="11" y2="22.5" stroke="#2c8ac9" stroke-width="1"/>
-      <line x1="5" y1="10.5" x2="11" y2="13.5" stroke="#f5c518" stroke-width="1"/>
-    </svg>
-    <span class="nav-wordmark">FluxCompute</span>
-  </a>
-  <div class="nav-links">
-    <a href="#advantage">Advantage</a>
-    <a href="#products">Products</a>
-    <a href="#how">How It Works</a>
-    <a href="#models">Models</a>
-    <a href="#testimonials">Customers</a>
+<!-- Nav -->
+<nav class="top">
+  <div class="left">
+    <a class="lockup" href="#">
+      <svg width="32" height="24" viewBox="0 0 36 28" aria-hidden="true">
+        <defs>
+          <linearGradient id="nav-g" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#5DD8E8"/><stop offset="100%" stop-color="#7C5CFF"/>
+          </linearGradient>
+        </defs>
+        <path d="M 4 22 C 10 22, 12 4, 18 4 C 24 4, 26 22, 32 22" fill="none" stroke="url(#nav-g)" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="4" cy="22" r="2.5" fill="#5DD8E8"/>
+        <circle cx="18" cy="4" r="2.5" fill="#9670FF"/>
+        <circle cx="32" cy="22" r="2.5" fill="#7C5CFF"/>
+      </svg>
+      <div class="name">Flux<span>Compute</span></div>
+    </a>
   </div>
-  <div class="nav-ctas">
-    <a href="#" class="btn-ghost">Sign In</a>
-    <a href="#" class="btn-solid">Try Free</a>
+  <div class="center">
+    <a href="#">How it works</a>
+    <a href="#">Research</a>
+    <a href="#">Pricing</a>
+    <a href="#">Docs</a>
+    <a href="#">Customers</a>
+  </div>
+  <div class="right">
+    <a href="#" style="font-size: var(--text-sm); color: var(--fg-1);">Sign in</a>
+    <a href="#" class="btn btn-flux btn-sm">Start free →</a>
   </div>
 </nav>
 
-<!-- ═══════════════════════════════════════════
-     HERO
-═══════════════════════════════════════════ -->
-<section id="hero">
-  <div class="inner">
-    <p class="hero-kicker">Agentic Infrastructure · May 2026</p>
-    <h1 class="hero-h1">
-      The <span class="hl">routing layer</span><br>
-      that makes agents<br>
-      <em>economically viable.</em>
+<!-- Hero -->
+<header class="hero">
+  <div class="container inner">
+    <div class="eyebrow">
+      <span class="badge badge-flux badge-dot">v1.0 · 60–70% inference cost reduction</span>
+      <span class="t-mono" style="color: var(--fg-2);">→ read the Cornell Tech paper</span>
+    </div>
+    <h1>
+      The compiler for<br/>
+      <span class="em flux-gradient-text">agentic systems.</span>
     </h1>
-    <p class="hero-sub">
-      FluxCompute sits between your application and the model graph — classifying, planning, routing, and auditing every inference call to maximize cost efficiency without sacrificing accuracy.
+    <p class="lede">
+      FluxCompute sits between your agent and your models. Every query gets analyzed in
+      ~12ms and routed to the cheapest model that can answer it correctly.
+      Same accuracy, fraction of the cost, no infra change.
     </p>
-    <div class="hero-actions">
-      <a href="#" class="hero-cta-primary">Start for Free →</a>
-      <a href="#" class="hero-cta-secondary">See How It Works</a>
+    <div class="cta">
+      <a class="btn btn-flux btn-lg">See it on your traffic →</a>
+      <a class="btn btn-ghost btn-lg">Read the paper</a>
+      <span class="hint">or <kbd>⌘</kbd><kbd>K</kbd> to search</span>
     </div>
 
-    <div class="hero-ticker">
-      <div class="ticker-item">
-        <div class="ticker-num">12.3×</div>
-        <div class="ticker-label">Cost reduction at iso-accuracy</div>
+    <!-- terminal -->
+    <div class="terminal-wrap">
+      <div class="terminal">
+        <div class="bar">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <div class="title">~/agent-app · flux compile</div>
+        </div>
+<pre class="code"><span class="gutter">1</span><span class="c">$</span> flux compile --provider anthropic \
+<span class="gutter">2</span>  --traces ./agent-traces.jsonl
+<span class="gutter">3</span>
+<span class="gutter">4</span><span class="c">→</span> analyzing 14d of agent traces   <span class="s">✓</span>  3.2s
+<span class="gutter">5</span><span class="c">→</span> training query classifier       <span class="s">✓</span>  18.4s
+<span class="gutter">6</span><span class="c">→</span> attaching KV cache layer        <span class="s">✓</span>  0.4s
+<span class="gutter">7</span><span class="c">→</span> healthcheck /v1/route           <span class="s">✓</span>  12ms</pre>
+        <div class="ok-line">
+          <span class="ok">●</span>
+          <span>Routing live · baseline $48,200/mo →</span>
+          <span class="url">projected $14,100/mo (−71%)</span>
+          <span style="margin-left:auto; color: var(--fg-2);">total: 22.0s</span>
+        </div>
       </div>
-      <div class="ticker-item">
-        <div class="ticker-num">&lt;30ms</div>
-        <div class="ticker-label">Routing overhead per turn</div>
-      </div>
-      <div class="ticker-item">
-        <div class="ticker-num">3.4×</div>
-        <div class="ticker-label">Lower energy footprint</div>
-      </div>
-      <div class="ticker-item">
-        <div class="ticker-num">&lt;1%</div>
-        <div class="ticker-label">Accuracy delta from baseline</div>
+    </div>
+
+    <!-- logo strip -->
+    <div class="strip">
+      <div class="lbl">Routing production agents at</div>
+      <div class="marks">
+        <span>◆ Mercator</span>
+        <span>Helix.ai</span>
+        <span>Bracket</span>
+        <span>Rune</span>
+        <span>Northwind</span>
+        <span>Yoke Labs</span>
       </div>
     </div>
   </div>
-</section>
+</header>
 
-<div class="sep"></div>
-
-<!-- ═══════════════════════════════════════════
-     ADVANTAGE
-═══════════════════════════════════════════ -->
-<section id="advantage">
-  <div class="inner">
-    <p class="section-tag reveal">Core advantage</p>
-    <h2 class="section-h2 reveal">Full ownership. Full-stack performance. Self-improving.</h2>
-    <p class="section-sub reveal">Most infrastructure platforms force you to choose between control and performance. FluxCompute delivers both — and compounds over time.</p>
-
-    <div class="advantage-grid reveal">
-      <div class="adv-card">
-        <div class="adv-icon">
-          <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-            <rect x="6" y="6" width="24" height="24" rx="4" stroke="#5fb04b" stroke-width="1.5"/>
-            <rect x="11" y="11" width="14" height="14" rx="2" fill="rgba(95,176,75,.15)" stroke="#5fb04b" stroke-width="1"/>
-            <path d="M16 18h4M18 16v4" stroke="#5fb04b" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
-        </div>
-        <h3>Own Your Routing</h3>
-        <p>Your traffic, your models, your weights. Deploy in your VPC, on-prem, or hybrid. FluxCompute never touches your data — it only touches the decision layer.</p>
-      </div>
-      <div class="adv-card">
-        <div class="adv-icon">
-          <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-            <polyline points="6,26 12,16 18,20 24,10 30,14" stroke="#f59022" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
-            <circle cx="6" cy="26" r="2" fill="#f59022"/>
-            <circle cx="30" cy="14" r="2" fill="#f59022"/>
-          </svg>
-        </div>
-        <h3>Full-Stack Optimization</h3>
-        <p>We tune from the query classifier down to GPU kernel scheduling. Not just prompt tweaks — every layer of the inference stack is in scope.</p>
-      </div>
-      <div class="adv-card">
-        <div class="adv-icon">
-          <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-            <path d="M18 6 L30 12 L30 24 L18 30 L6 24 L6 12 Z" stroke="#2c8ac9" stroke-width="1.5" fill="none"/>
-            <path d="M18 12 C18 12 22 16 22 18 C22 20 20 22 18 22 C16 22 14 20 14 18 C14 16 18 12 18 12Z" fill="rgba(44,138,201,.2)" stroke="#2c8ac9" stroke-width="1"/>
-            <path d="M18 30 L18 22M6 12 L14 16M30 12 L22 16" stroke="#2c8ac9" stroke-width="1" opacity=".6"/>
-          </svg>
-        </div>
-        <h3>Self-Improving Loop</h3>
-        <p>Every routed request sharpens the classifier. Telemetry feeds back into the routing model automatically — so performance compounds without manual tuning.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════
-     METRICS BAND
-═══════════════════════════════════════════ -->
-<section id="metrics">
-  <div class="inner">
-    <p class="metrics-headline reveal">
-      Three outcomes, <em>one routing layer</em> — faster inference, stronger accuracy, dramatically lower cost.
-    </p>
-    <div class="metrics-row reveal">
-      <div class="met">
-        <div class="met-val">12.3×</div>
-        <div class="met-lbl">Cheaper at iso-accuracy</div>
-      </div>
-      <div class="met">
-        <div class="met-val">2.3×</div>
-        <div class="met-lbl">Faster end-to-end latency</div>
-      </div>
-      <div class="met">
-        <div class="met-val">3.4×</div>
-        <div class="met-lbl">Lower energy use</div>
-      </div>
-      <div class="met">
-        <div class="met-val">&lt;1%</div>
-        <div class="met-lbl">Accuracy loss vs baseline</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════
-     PRODUCTS / PIPELINE
-═══════════════════════════════════════════ -->
-<section id="products">
-  <div class="inner">
-    <div class="products-header reveal">
+<!-- 01 Features -->
+<section class="s">
+  <div class="container">
+    <div class="s-head">
       <div>
-        <p class="section-tag">Product pipeline</p>
-        <h2 class="section-h2">From classification to audit — in under 30ms.</h2>
+        <div class="num">01 · How it works</div>
+        <h2>Five layers. Zero infra changes.</h2>
       </div>
-      <p class="section-sub" style="margin-top:0">Four decisions per request. Each one optimized independently, executed together as a seamless routing brain.</p>
+      <p>You keep your agent and your models. FluxCompute compiles every query down to the model that should actually run it — and caches, monitors, and corrects itself along the way.</p>
     </div>
 
-    <div class="pipeline reveal">
-      <div class="pipe-item">
-        <div class="pipe-dot"></div>
-        <div>
-          <div class="pipe-name">FlexClassify</div>
-          <div class="pipe-desc">Categorizes incoming queries by complexity, domain, and cost sensitivity in under 12ms. The foundation of every routing decision.</div>
+    <div class="features">
+      <div class="feat">
+        <div class="glyph">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <ellipse cx="12" cy="5" rx="9" ry="3"/>
+            <path d="M3 5v14a9 3 0 0 0 18 0V5"/>
+            <path d="M3 12a9 3 0 0 0 18 0"/>
+          </svg>
         </div>
-        <div class="pipe-badge">12ms · GPU</div>
-      </div>
-      <div class="pipe-item">
-        <div class="pipe-dot"></div>
-        <div>
-          <div class="pipe-name">FlexPlan</div>
-          <div class="pipe-desc">Determines multi-step agent structure, tool use, and model tier selection. Constructs the execution graph before a single token is generated.</div>
-        </div>
-        <div class="pipe-badge">8ms · CPU</div>
-      </div>
-      <div class="pipe-item">
-        <div class="pipe-dot"></div>
-        <div>
-          <div class="pipe-name">FlexRoute</div>
-          <div class="pipe-desc">Executes the routing decision — dispatching to commercial API tiers or compressed on-prem models based on the plan output.</div>
-        </div>
-        <div class="pipe-badge">Inline · Zero copy</div>
-      </div>
-      <div class="pipe-item">
-        <div class="pipe-dot"></div>
-        <div>
-          <div class="pipe-name">FlexAudit</div>
-          <div class="pipe-desc">Async drift monitoring and telemetry loop. Feeds back into FlexClassify to improve routing accuracy with every production request.</div>
-        </div>
-        <div class="pipe-badge">Async · Continuous</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════
-     HOW IT WORKS
-═══════════════════════════════════════════ -->
-<section id="how">
-  <div class="inner">
-    <p class="section-tag reveal">How it works</p>
-    <h2 class="section-h2 reveal">Connect once. Save immediately.</h2>
-
-    <div class="steps">
-      <div class="step reveal">
-        <div class="step-num">01</div>
-        <h3>Connect your models</h3>
-        <p>Drop in your API keys for OpenAI, Anthropic, or Google — or point us at your on-prem cluster. No migration, no refactoring.</p>
-      </div>
-      <div class="step reveal">
-        <div class="step-num">02</div>
-        <h3>Run in shadow mode</h3>
-        <p>We mirror your live traffic, route in the background, and prove savings — before you commit to switching a single production request.</p>
-      </div>
-      <div class="step reveal">
-        <div class="step-num">03</div>
-        <h3>Flip the switch</h3>
-        <p>When savings are proven, activate. FluxCompute becomes your inference layer — invisible to end users, decisive on your bill.</p>
-      </div>
-      <div class="step reveal">
-        <div class="step-num">04</div>
-        <h3>Compound over time</h3>
-        <p>Telemetry sharpens the classifier. Every request improves the next routing decision. Your savings grow without additional work.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════
-     MODEL GRID
-═══════════════════════════════════════════ -->
-<section id="models">
-  <div class="inner">
-    <p class="section-tag reveal">Supported models</p>
-    <h2 class="section-h2 reveal" style="max-width:30ch">Route across the full model landscape — commercial and open-source.</h2>
-    <p class="section-sub reveal">FluxCompute routes across every major provider and open-source family. Add new models in minutes via our unified adapter layer.</p>
-
-    <div class="model-strip reveal">
-      <div class="model-chip"><div class="model-dot" style="background:var(--g)"></div>GPT-4o</div>
-      <div class="model-chip"><div class="model-dot" style="background:var(--b)"></div>Claude 3.7 Sonnet</div>
-      <div class="model-chip"><div class="model-dot" style="background:var(--o)"></div>Gemini 2.5 Pro</div>
-      <div class="model-chip"><div class="model-dot" style="background:var(--p)"></div>Llama 3.3 70B</div>
-      <div class="model-chip"><div class="model-dot" style="background:var(--r)"></div>DeepSeek V3.1</div>
-      <div class="model-chip"><div class="model-dot" style="background:var(--y)"></div>Qwen3 235B</div>
-      <div class="model-chip"><div class="model-dot" style="background:var(--g)"></div>Mistral Large</div>
-      <div class="model-chip"><div class="model-dot" style="background:var(--b)"></div>Gemma 3 27B</div>
-      <div class="model-chip"><div class="model-dot" style="background:var(--o)"></div>Command R+</div>
-      <div class="model-chip"><div class="model-dot" style="background:var(--cream-3)"></div>+ your custom models</div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════
-     TESTIMONIALS
-═══════════════════════════════════════════ -->
-<section id="testimonials">
-  <div class="inner">
-    <p class="section-tag reveal">Customers</p>
-    <h2 class="section-h2 reveal">Trusted by teams paying real inference bills.</h2>
-
-    <div class="testi-grid reveal">
-      <div class="testi">
-        <div class="testi-mark">&ldquo;</div>
-        <p class="testi-quote">FluxCompute cut our monthly model spend by 8× on a customer support workload we thought was already optimized. The shadow mode gave us the confidence to flip the switch in under a week.</p>
-        <div class="testi-attr">
-          <div class="testi-name">Sarah K. · CTO</div>
-          <div class="testi-co">Series B SaaS · $120k/mo inference</div>
+        <h3>L0 · KV cache persistence</h3>
+        <p>Multi-turn agents recompute attention states on every turn. We persist them by session ID and restore them on the next step. Invisible to your agent code.</p>
+        <div class="stat">
+          <span class="k">Prefill recompute</span>
+          <span class="v">−50<span class="unit">%</span></span>
         </div>
       </div>
-      <div class="testi">
-        <div class="testi-mark">&ldquo;</div>
-        <p class="testi-quote">We're a regulated fintech — on-prem was non-negotiable. FluxCompute was the only routing layer that could work with our existing hardware without touching our data plane. Deployed in two days.</p>
-        <div class="testi-attr">
-          <div class="testi-name">Marcus D. · Head of AI</div>
-          <div class="testi-co">Enterprise Fintech · On-prem deployment</div>
+
+      <div class="feat">
+        <div class="glyph">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 7h18M3 12h12M3 17h6"/>
+          </svg>
+        </div>
+        <h3>L1 · Query classifier</h3>
+        <p>Real-time difficulty analysis on every incoming query. Easy → Haiku. Medium → Sonnet. Hard → Opus. Re-classifies when execution branches into a tool call or reasoning loop.</p>
+        <div class="stat">
+          <span class="k">Routing overhead</span>
+          <span class="v">12<span class="unit">ms</span></span>
         </div>
       </div>
-      <div class="testi">
-        <div class="testi-mark">&ldquo;</div>
-        <p class="testi-quote">The routing accuracy just keeps improving. Six months in, we're routing 40% more traffic to cheaper models than month one — with the same quality thresholds. It actually compounds.</p>
-        <div class="testi-attr">
-          <div class="testi-name">Priya L. · Engineering Lead</div>
-          <div class="testi-co">AI-native startup · 50M+ requests/day</div>
+
+      <div class="feat">
+        <div class="glyph">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="16 18 22 12 16 6"/>
+            <polyline points="8 6 2 12 8 18"/>
+          </svg>
+        </div>
+        <h3>L2 · Model executor</h3>
+        <p>Dispatches each query to the chosen model — API tier or local weights. Translates context across model boundaries so agent state survives the switch mid-execution.</p>
+        <div class="stat">
+          <span class="k">Providers</span>
+          <span class="v">OpenAI · Anthropic · Local</span>
+        </div>
+      </div>
+
+      <div class="feat">
+        <div class="glyph">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12h4l3-9 4 18 3-9h4"/>
+          </svg>
+        </div>
+        <h3>L3 · Drift monitor</h3>
+        <p>Tracks whether each routing decision was correct. Detects when query distribution shifts — seasonal, customer cohort, new feature — and triggers automatic recompilation monthly.</p>
+        <div class="stat">
+          <span class="k">Accuracy delta vs. baseline</span>
+          <span class="v">&lt;1<span class="unit">%</span></span>
+        </div>
+      </div>
+
+      <div class="feat">
+        <div class="glyph">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="9"/>
+            <rect x="14" y="3" width="7" height="5"/>
+            <rect x="14" y="12" width="7" height="9"/>
+            <rect x="3" y="16" width="7" height="5"/>
+          </svg>
+        </div>
+        <h3>L4 · Observability</h3>
+        <p>Cost per query, per type, per customer. Latency breakdowns. Routing accuracy. The dashboard your CFO asks for — exposed as Prometheus, OTLP, or our UI.</p>
+        <div class="stat">
+          <span class="k">Telemetry</span>
+          <span class="v">OTLP · Prom · S3</span>
+        </div>
+      </div>
+
+      <div class="feat">
+        <div class="glyph">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2"/>
+            <path d="M7 11V7a5 5 0 0110 0v4"/>
+          </svg>
+        </div>
+        <h3>On-prem compression</h3>
+        <p>For regulated workloads — HIPAA, GDPR, classified, sovereign. Run 80% of queries on compressed models 40–70% smaller, with no measurable accuracy loss on your workload. All data stays local.</p>
+        <div class="stat">
+          <span class="k">Model compression</span>
+          <span class="v">40–70<span class="unit">%</span></span>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ═══════════════════════════════════════════
-     CTA FINALE
-═══════════════════════════════════════════ -->
-<section id="cta-final">
-  <div class="inner">
-    <p class="cta-final-tag reveal">Start building today</p>
-    <h2 class="cta-final-h reveal">
-      The agentic economy needs a routing layer. That's us.
-    </h2>
-    <p class="cta-final-sub reveal">
-      Connect your first model in minutes. Prove savings in shadow mode. Keep ~20% of what we cut — we take a slice of the rest.
-    </p>
-    <div class="cta-final-btns reveal">
-      <a href="#" class="hero-cta-primary">Start for Free</a>
-      <a href="#" class="hero-cta-secondary">Talk to Us</a>
+<!-- 02 Latency / showcase -->
+<section class="s">
+  <div class="container">
+    <div class="s-head">
+      <div>
+        <div class="num">02 · Performance</div>
+        <h2>Numbers, not adjectives.</h2>
+      </div>
+      <p>Measured on real production agent workloads, A6000 Ada hardware, against HumanEval and TriviaQA. Cost normalized to baseline of routing every query to the top-tier model. Lower is better.</p>
     </div>
-    <div class="cta-rainbow reveal">
-      <div class="rainbow">
-        <s></s><s></s><s></s><s></s><s></s><s></s>
+
+    <div class="showcase">
+      <div class="panel">
+        <div class="panel-h">
+          <h3>Inference cost · normalized</h3>
+          <span class="meta">N=2.1M queries · &lt;1% accuracy delta</span>
+        </div>
+        <div class="bars">
+          <div class="bar-row us">
+            <span class="name us">FluxCompute</span>
+            <div class="track"><div class="fill" style="width: 30%;"></div></div>
+            <span class="val">0.30×</span>
+          </div>
+          <div class="bar-row">
+            <span class="name">Single-tier router</span>
+            <div class="track"><div class="fill" style="width: 72%;"></div></div>
+            <span class="val">0.72×</span>
+          </div>
+          <div class="bar-row">
+            <span class="name">Prompt compression</span>
+            <div class="track"><div class="fill" style="width: 84%;"></div></div>
+            <span class="val">0.84×</span>
+          </div>
+          <div class="bar-row">
+            <span class="name">KV cache only</span>
+            <div class="track"><div class="fill" style="width: 88%;"></div></div>
+            <span class="val">0.88×</span>
+          </div>
+          <div class="bar-row">
+            <span class="name">Baseline (top tier)</span>
+            <div class="track"><div class="fill" style="width: 100%;"></div></div>
+            <span class="val">1.00×</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-h">
+          <h3>Live routing feed</h3>
+          <span class="meta" id="now">prod · streaming</span>
+        </div>
+        <div class="feed" id="feed">
+          <div class="feed-row"><span class="t">21:14:08</span><span class="ms">11ms</span><span class="ep">easy → haiku</span><span class="st" style="color: var(--status-ok);">200</span></div>
+          <div class="feed-row"><span class="t">21:14:08</span><span class="ms">14ms</span><span class="ep">medium → sonnet</span><span class="st" style="color: var(--status-ok);">200</span></div>
+          <div class="feed-row"><span class="t">21:14:07</span><span class="ms">9ms</span><span class="ep">easy → haiku</span><span class="st" style="color: var(--status-ok);">200</span></div>
+          <div class="feed-row"><span class="t">21:14:07</span><span class="ms">22ms</span><span class="ep">hard → opus</span><span class="st" style="color: var(--status-ok);">200</span></div>
+          <div class="feed-row"><span class="t">21:14:06</span><span class="ms">17ms</span><span class="ep">medium → sonnet · branch</span><span class="st" style="color: var(--status-warn);">200</span></div>
+          <div class="feed-row"><span class="t">21:14:06</span><span class="ms">10ms</span><span class="ep">easy → haiku</span><span class="st" style="color: var(--status-ok);">200</span></div>
+          <div class="feed-row"><span class="t">21:14:05</span><span class="ms">13ms</span><span class="ep">easy → haiku</span><span class="st" style="color: var(--status-ok);">200</span></div>
+          <div class="feed-row"><span class="t">21:14:05</span><span class="ms">19ms</span><span class="ep">hard → opus</span><span class="st" style="color: var(--status-ok);">200</span></div>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ═══════════════════════════════════════════
-     FOOTER
-═══════════════════════════════════════════ -->
-<footer>
-  <div class="footer-top">
-    <div class="footer-brand">
-      <a href="#" class="nav-logo" style="display:inline-flex">
-        <svg class="logo-mark" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <polygon points="18,3 31,10.5 31,25.5 18,33 5,25.5 5,10.5" fill="none" stroke="#2c8ac9" stroke-width="1.5"/>
-          <polygon points="18,9 25,13.5 25,22.5 18,27 11,22.5 11,13.5" fill="none" stroke="#7d3f98" stroke-width="1"/>
-          <circle cx="18" cy="18" r="3.5" fill="#2c8ac9"/>
-          <line x1="18" y1="3" x2="18" y2="9" stroke="#5fb04b" stroke-width="1"/>
-          <line x1="31" y1="10.5" x2="25" y2="13.5" stroke="#f59022" stroke-width="1"/>
-          <line x1="31" y1="25.5" x2="25" y2="22.5" stroke="#d9352a" stroke-width="1"/>
-          <line x1="18" y1="33" x2="18" y2="27" stroke="#7d3f98" stroke-width="1"/>
-          <line x1="5" y1="25.5" x2="11" y2="22.5" stroke="#2c8ac9" stroke-width="1"/>
-          <line x1="5" y1="10.5" x2="11" y2="13.5" stroke="#f5c518" stroke-width="1"/>
-        </svg>
-        <span class="nav-wordmark" style="margin-left:.5rem">FluxCompute</span>
-      </a>
-      <p>The routing layer that makes the agentic economy economically viable. We take 20% of what we cut.</p>
+<!-- 03 Pricing -->
+<section class="s">
+  <div class="container">
+    <div class="s-head">
+      <div>
+        <div class="num">03 · Pricing</div>
+        <h2>We win when you win.</h2>
+      </div>
+      <p>Outcome-aligned. We bill 20% of the inference spend we eliminate, measured against your own pre-FluxCompute baseline. No savings, no bill.</p>
     </div>
-    <div class="footer-col">
-      <h5>Product</h5>
-      <a href="#">FlexClassify</a>
-      <a href="#">FlexPlan</a>
-      <a href="#">FlexRoute</a>
-      <a href="#">FlexAudit</a>
-      <a href="#">Pricing</a>
-    </div>
-    <div class="footer-col">
-      <h5>Company</h5>
-      <a href="#">About</a>
-      <a href="#">Research</a>
-      <a href="#">Blog</a>
-      <a href="#">Careers</a>
-      <a href="#">Press</a>
-    </div>
-    <div class="footer-col">
-      <h5>Connect</h5>
-      <a href="#">Twitter / X</a>
-      <a href="#">GitHub</a>
-      <a href="#">LinkedIn</a>
-      <a href="#">Discord</a>
-      <a href="#">Status</a>
+
+    <div class="pricing">
+      <div class="price">
+        <div class="tier">Pilot</div>
+        <h3>Pilot</h3>
+        <div class="amt"><span class="num">Free</span><span class="unit">/ 14 days</span></div>
+        <ul>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>Drop-in routing for one workload</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>Baseline + savings report</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>OpenAI · Anthropic · Google</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>No card. No commit.</span></li>
+        </ul>
+        <a class="btn btn-ghost">Start pilot</a>
+      </div>
+
+      <div class="price featured">
+        <div class="tier">Most teams</div>
+        <h3>Growth</h3>
+        <div class="amt"><span class="num">20%</span><span class="unit">of savings</span></div>
+        <ul>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>All five layers, all workloads</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>Multi-turn KV cache persistence</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>Drift monitor + monthly recompile</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>OTLP + Prometheus export</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>Slack support · 4h response</span></li>
+        </ul>
+        <a class="btn btn-flux">Start 14-day pilot →</a>
+      </div>
+
+      <div class="price">
+        <div class="tier">Regulated</div>
+        <h3>Enterprise</h3>
+        <div class="amt"><span class="num">Talk to us</span></div>
+        <ul>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>On-prem deployment, no API egress</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>Model compression (40–70%)</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>HIPAA · GDPR · FedRAMP-ready</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>SAML SSO + SCIM</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>Solutions architect</span></li>
+        </ul>
+        <a class="btn btn-ghost">Contact sales</a>
+      </div>
     </div>
   </div>
-  <div class="footer-bottom">
+</section>
+
+<!-- CTA -->
+<div class="container">
+  <div class="cta-final">
+    <h2>See your inference bill drop in two weeks.</h2>
+    <p>Free 14-day pilot on your own traffic. We bill nothing until we prove the savings.</p>
+    <div class="row">
+      <a class="btn btn-flux btn-lg">Start pilot →</a>
+      <a class="btn btn-ghost btn-lg">Read the paper</a>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="container">
+  <div>
+    <div class="lockup" style="display:flex; gap: var(--s-3); align-items: center;">
+      <svg width="32" height="24" viewBox="0 0 36 28" aria-hidden="true">
+        <defs><linearGradient id="ft-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#5DD8E8"/><stop offset="100%" stop-color="#7C5CFF"/></linearGradient></defs>
+        <path d="M 4 22 C 10 22, 12 4, 18 4 C 24 4, 26 22, 32 22" fill="none" stroke="url(#ft-g)" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="4" cy="22" r="2.5" fill="#5DD8E8"/>
+        <circle cx="18" cy="4" r="2.5" fill="#9670FF"/>
+        <circle cx="32" cy="22" r="2.5" fill="#7C5CFF"/>
+      </svg>
+      <div style="font: 600 var(--text-md)/1 var(--font-sans); letter-spacing: var(--tracking-tight);">Flux<span style="opacity:.65; font-weight:500;">Compute</span></div>
+    </div>
+    <p class="meta">The compiler for agentic systems. Built on Cornell Tech research. New York · San Francisco.</p>
+  </div>
+  <div>
+    <h4>Product</h4>
+    <ul>
+      <li><a href="#">How it works</a></li>
+      <li><a href="#">Pricing</a></li>
+      <li><a href="#">On-prem</a></li>
+      <li><a href="#">Status</a></li>
+    </ul>
+  </div>
+  <div>
+    <h4>Developers</h4>
+    <ul>
+      <li><a href="#">Documentation</a></li>
+      <li><a href="#">API reference</a></li>
+      <li><a href="#">CLI</a></li>
+      <li><a href="#">Examples</a></li>
+    </ul>
+  </div>
+  <div>
+    <h4>Company</h4>
+    <ul>
+      <li><a href="#">Research</a></li>
+      <li><a href="#">Customers</a></li>
+      <li><a href="#">Careers</a></li>
+      <li><a href="#">Security</a></li>
+    </ul>
+  </div>
+  <div class="copy">
     <span>© 2026 FluxCompute, Inc.</span>
-    <span>Privacy · Terms · Security</span>
+    <span>SOC 2 Type II · build #4f2a91</span>
   </div>
 </footer>
 
 <script>
-// Scroll reveal
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach((e, i) => {
-    if (e.isIntersecting) {
-      // small stagger for sibling groups
-      const siblings = e.target.parentElement.querySelectorAll('.reveal');
-      let delay = 0;
-      siblings.forEach((s, idx) => { if (s === e.target) delay = idx * 80; });
-      setTimeout(() => {
-        e.target.classList.add('visible');
-        observer.unobserve(e.target);
-      }, delay);
-    }
-  });
-}, { threshold: 0.12 });
-
-document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-
-// Nav shrink on scroll
-const nav = document.querySelector('nav');
-window.addEventListener('scroll', () => {
-  if (window.scrollY > 60) {
-    nav.style.padding = '.6rem var(--pad)';
-  } else {
-    nav.style.padding = '.9rem var(--pad)';
-  }
-}, { passive: true });
+  // Live feed: prepend a row every ~2s, drop tail
+  const feed = document.getElementById('feed');
+  // Weighted: most queries are easy/medium, few are hard, occasional branch
+  const routes = [
+    { label: 'easy → haiku',     weight: 55, ms: [8, 14] },
+    { label: 'medium → sonnet',  weight: 30, ms: [12, 20] },
+    { label: 'hard → opus',      weight: 12, ms: [16, 26] },
+    { label: 'medium → sonnet · branch', weight: 3, ms: [15, 24], warn: true },
+  ];
+  const totalW = routes.reduce((s, r) => s + r.weight, 0);
+  const pickRoute = () => {
+    let r = Math.random() * totalW;
+    for (const route of routes) { r -= route.weight; if (r <= 0) return route; }
+    return routes[0];
+  };
+  const pad = n => String(n).padStart(2,'0');
+  setInterval(() => {
+    const d = new Date();
+    const t = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    const route = pickRoute();
+    const ms = (route.ms[0] + Math.floor(Math.random() * (route.ms[1] - route.ms[0]))) + 'ms';
+    const row = document.createElement('div');
+    row.className = 'feed-row';
+    row.style.opacity = '0';
+    row.style.transform = 'translateY(-4px)';
+    row.style.transition = 'opacity 200ms ease, transform 200ms ease';
+    row.innerHTML = `
+      <span class="t">${t}</span>
+      <span class="ms">${ms}</span>
+      <span class="ep">${route.label}</span>
+      <span class="st" style="color: var(--${route.warn ? 'status-warn' : 'status-ok'});">200</span>
+    `;
+    feed.prepend(row);
+    requestAnimationFrame(() => { row.style.opacity = '1'; row.style.transform = 'translateY(0)'; });
+    if (feed.children.length > 8) feed.lastElementChild.remove();
+  }, 2200);
 </script>
+
 </body>
 </html>
