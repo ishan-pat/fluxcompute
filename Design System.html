@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>FluxCompute — Design System</title>
+<link rel="stylesheet" href="tokens.css"/>
+<style>
+  body { padding: 0; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: var(--s-8) var(--s-6) var(--s-9); }
+
+  header.top {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: var(--s-5) var(--s-6);
+    border-bottom: 1px solid var(--line-1);
+    position: sticky; top: 0; z-index: 10;
+    background: color-mix(in oklch, var(--bg-0) 88%, transparent);
+    backdrop-filter: blur(12px);
+  }
+  header.top .lockup { display: flex; align-items: center; gap: var(--s-3); }
+  header.top svg { color: var(--fg-0); }
+  header.top .meta { display: flex; gap: var(--s-3); align-items: center; }
+
+  .theme-switch {
+    display: inline-flex; padding: 2px;
+    background: var(--bg-2); border: 1px solid var(--line-2);
+    border-radius: var(--r-pill);
+  }
+  .theme-switch button {
+    border: 0; background: transparent; color: var(--fg-1);
+    height: 26px; padding: 0 var(--s-3);
+    font: 500 var(--text-xs)/1 var(--font-sans);
+    border-radius: var(--r-pill); cursor: pointer;
+    letter-spacing: -0.005em;
+  }
+  .theme-switch button[aria-pressed="true"] { background: var(--bg-0); color: var(--fg-0); box-shadow: var(--shadow-1); }
+
+  .hero {
+    padding: var(--s-9) 0 var(--s-8);
+    border-bottom: 1px solid var(--line-1);
+    position: relative;
+  }
+  .hero h1 {
+    font: 600 var(--text-3xl)/var(--leading-tight) var(--font-sans);
+    letter-spacing: var(--tracking-display);
+    margin: 0 0 var(--s-4);
+    max-width: 720px;
+  }
+  .hero p {
+    margin: 0; max-width: 540px;
+    color: var(--fg-1); font-size: var(--text-md);
+    line-height: var(--leading-body);
+  }
+  .hero .stamp {
+    display: inline-flex; gap: var(--s-2); align-items: center;
+    margin-bottom: var(--s-5);
+  }
+
+  section { padding: var(--s-8) 0; border-bottom: 1px solid var(--line-1); }
+  section:last-of-type { border-bottom: 0; }
+
+  .section-head {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: var(--s-7);
+    margin-bottom: var(--s-6);
+    align-items: baseline;
+  }
+  .section-head .num { color: var(--fg-2); font-family: var(--font-mono); font-size: var(--text-xs); letter-spacing: var(--tracking-caps); }
+  .section-head h2 { margin: 0; font: 600 var(--text-2xl)/1.05 var(--font-sans); letter-spacing: var(--tracking-tight); }
+  .section-head p { margin: var(--s-2) 0 0; color: var(--fg-1); max-width: 520px; }
+
+  /* === Color === */
+  .swatches {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--s-4);
+  }
+  .sw {
+    border: 1px solid var(--line-1);
+    border-radius: var(--r-3);
+    overflow: hidden;
+    background: var(--bg-1);
+  }
+  .sw .chip { aspect-ratio: 16/10; }
+  .sw .meta { padding: var(--s-3) var(--s-4); display: flex; justify-content: space-between; align-items: baseline; gap: var(--s-3); border-top: 1px solid var(--line-1); }
+  .sw .meta .name { font-weight: 500; font-size: var(--text-sm); }
+  .sw .meta code { font-family: var(--font-mono); font-size: 11px; color: var(--fg-2); }
+
+  .accent-row {
+    display: grid; grid-template-columns: 1.4fr 1fr; gap: var(--s-4);
+    margin-top: var(--s-4);
+  }
+  .accent-tile {
+    border-radius: var(--r-4);
+    padding: var(--s-7);
+    min-height: 220px;
+    display: flex; flex-direction: column; justify-content: space-between;
+    color: oklch(15% 0.012 260);
+    background: var(--flux-gradient);
+    position: relative; overflow: hidden;
+  }
+  .accent-tile::after {
+    content: ""; position: absolute; inset: 0;
+    background-image: radial-gradient(circle at 1px 1px, oklch(15% 0.012 260 / 0.18) 1px, transparent 0);
+    background-size: 16px 16px;
+    pointer-events: none;
+    mix-blend-mode: multiply;
+  }
+  .accent-tile .label { font-family: var(--font-mono); font-size: var(--text-xs); letter-spacing: var(--tracking-caps); text-transform: uppercase; opacity: 0.8; }
+  .accent-tile .name  { font: 600 var(--text-2xl)/1 var(--font-sans); letter-spacing: var(--tracking-display); margin-top: var(--s-2); }
+  .accent-tile .stops { display: flex; gap: var(--s-4); font-family: var(--font-mono); font-size: var(--text-xs); }
+  .status-stack { display: grid; gap: var(--s-3); }
+  .status-row {
+    display: flex; align-items: center; gap: var(--s-3);
+    padding: var(--s-3) var(--s-4);
+    border: 1px solid var(--line-1); border-radius: var(--r-3);
+    background: var(--bg-1);
+  }
+  .status-row .dot { width: 10px; height: 10px; border-radius: 50%; box-shadow: 0 0 8px currentColor; }
+  .status-row .lbl { flex: 1; font-size: var(--text-sm); }
+  .status-row code { font-family: var(--font-mono); font-size: 11px; color: var(--fg-2); }
+
+  /* === Type === */
+  .type-stack { display: grid; gap: var(--s-5); }
+  .type-row {
+    display: grid; grid-template-columns: 180px 1fr; gap: var(--s-6);
+    padding: var(--s-4) 0; border-top: 1px solid var(--line-1);
+    align-items: baseline;
+  }
+  .type-row:first-child { border-top: 0; }
+  .type-row .meta { display: flex; flex-direction: column; gap: 2px; }
+  .type-row .meta .nm { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--fg-2); letter-spacing: var(--tracking-caps); text-transform: uppercase; }
+  .type-row .meta .sz { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--fg-3); }
+  .type-row .sample { color: var(--fg-0); }
+
+  /* === Spacing === */
+  .scale {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: var(--s-3);
+    align-items: end;
+  }
+  .scale .step {
+    display: flex; flex-direction: column; align-items: center; gap: var(--s-2);
+  }
+  .scale .bar { width: 100%; background: var(--flux-gradient); border-radius: 2px; }
+  .scale .lbl { font-family: var(--font-mono); font-size: 11px; color: var(--fg-2); }
+
+  /* === Radius === */
+  .radii {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--s-4);
+  }
+  .radii .item {
+    aspect-ratio: 1.6;
+    background: var(--bg-2);
+    border: 1px solid var(--line-2);
+    display: flex; align-items: end; justify-content: space-between;
+    padding: var(--s-3) var(--s-4);
+    font-family: var(--font-mono); font-size: var(--text-xs); color: var(--fg-2);
+  }
+  .radii .item .nm { color: var(--fg-1); }
+
+  /* === Components === */
+  .components-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: var(--s-4);
+  }
+  .demo {
+    background: var(--bg-1);
+    border: 1px solid var(--line-1);
+    border-radius: var(--r-3);
+    overflow: hidden;
+  }
+  .demo .demo-h {
+    padding: var(--s-3) var(--s-4);
+    border-bottom: 1px solid var(--line-1);
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: var(--tracking-caps);
+    text-transform: uppercase; color: var(--fg-2);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .demo .demo-b { padding: var(--s-5); display: flex; flex-wrap: wrap; gap: var(--s-3); align-items: center; }
+  .demo .demo-b.col { flex-direction: column; align-items: stretch; }
+
+  /* === Endpoint card (signature component preview) === */
+  .endpoint {
+    border: 1px solid var(--line-1);
+    background: var(--bg-1);
+    border-radius: var(--r-4);
+    padding: var(--s-5);
+    display: grid;
+    gap: var(--s-4);
+  }
+  .endpoint .head { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--s-4); }
+  .endpoint .head .title { font: 600 var(--text-md)/1.2 var(--font-sans); margin: 0 0 2px; }
+  .endpoint .head .sub { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--fg-2); }
+  .endpoint .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-4); padding-top: var(--s-4); border-top: 1px solid var(--line-1); }
+  .endpoint .stat { display: flex; flex-direction: column; gap: 2px; }
+  .endpoint .stat .k { font-family: var(--font-mono); font-size: 10px; letter-spacing: var(--tracking-caps); text-transform: uppercase; color: var(--fg-2); }
+  .endpoint .stat .v { font-family: var(--font-mono); font-size: var(--text-md); color: var(--fg-0); }
+  .endpoint .stat .v .unit { color: var(--fg-2); font-size: 11px; margin-left: 2px; }
+
+  .spark { width: 100%; height: 28px; }
+
+  .footnote {
+    color: var(--fg-2); font-size: var(--text-xs); font-family: var(--font-mono);
+    letter-spacing: var(--tracking-caps); text-transform: uppercase;
+  }
+
+  /* === Logo block === */
+  .logo-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: var(--s-4); }
+  .logo-card {
+    aspect-ratio: 1.7;
+    border: 1px solid var(--line-1);
+    border-radius: var(--r-3);
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+  }
+  .logo-card.dark  { background: oklch(15% 0.012 260); color: oklch(98% 0.005 90); }
+  .logo-card.light { background: oklch(99% 0.003 90); color: oklch(18% 0.012 260); }
+  .logo-card.flux  { background: var(--flux-gradient); color: oklch(15% 0.012 260); }
+  .logo-card .crn { position: absolute; bottom: var(--s-3); left: var(--s-4); font-family: var(--font-mono); font-size: 10px; letter-spacing: var(--tracking-caps); text-transform: uppercase; opacity: 0.7; }
+
+  /* === Tweaks: theme toggle persists in URL hash === */
+  @media (max-width: 880px) {
+    .swatches, .components-grid, .radii { grid-template-columns: repeat(2, 1fr); }
+    .scale { grid-template-columns: repeat(5, 1fr); }
+    .logo-grid, .accent-row { grid-template-columns: 1fr; }
+    .section-head { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="lockup">
+    <!-- inline mark for currentColor -->
+    <svg width="36" height="28" viewBox="0 0 36 28" fill="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="flux-h" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#5DD8E8"/>
+          <stop offset="100%" stop-color="#7C5CFF"/>
+        </linearGradient>
+      </defs>
+      <path d="M 4 22 C 10 22, 12 4, 18 4 C 24 4, 26 22, 32 22"
+            fill="none" stroke="url(#flux-h)" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="4" cy="22" r="2.5" fill="#5DD8E8"/>
+      <circle cx="18" cy="4" r="2.5" fill="#9670FF"/>
+      <circle cx="32" cy="22" r="2.5" fill="#7C5CFF"/>
+    </svg>
+    <div style="font: 600 var(--text-md)/1 var(--font-sans); letter-spacing: var(--tracking-tight);">
+      Flux<span style="opacity:.65; font-weight:500;">Compute</span>
+    </div>
+    <span class="badge" style="margin-left: var(--s-2);">design&nbsp;system v0.1</span>
+  </div>
+  <div class="meta">
+    <div class="theme-switch" role="tablist" aria-label="theme">
+      <button data-theme-set="dark"  aria-pressed="true">Dark</button>
+      <button data-theme-set="light" aria-pressed="false">Light</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- Hero -->
+  <div class="hero bg-grid">
+    <div class="stamp">
+      <span class="badge badge-flux badge-dot">spec sheet</span>
+      <span class="t-mono" style="color: var(--fg-2);">tokens.css · v0.1.0 · 2025-Q4</span>
+    </div>
+    <h1>The visual language of <span class="flux-gradient-text">FluxCompute</span>.</h1>
+    <p>A dark-first developer aesthetic — restrained color, technical density, and one accent for the moments that matter. This sheet is the source of truth.</p>
+  </div>
+
+  <!-- 01 Logo -->
+  <section>
+    <div class="section-head">
+      <div>
+        <div class="num">01 · Brand</div>
+        <h2>Mark &amp; lockup</h2>
+        <p>The flux line — one stroke, three nodes, gradient stops at cyan and violet. Energy traveling through a network.</p>
+      </div>
+      <div class="logo-grid">
+        <div class="logo-card dark">
+          <svg width="220" height="52" viewBox="0 0 200 48" aria-hidden="true">
+            <defs>
+              <linearGradient id="lg-d" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#5DD8E8"/><stop offset="100%" stop-color="#7C5CFF"/>
+              </linearGradient>
+            </defs>
+            <g transform="translate(4 8)">
+              <path d="M 2 26 C 8 26, 10 6, 16 6 C 22 6, 24 26, 30 26" fill="none" stroke="url(#lg-d)" stroke-width="3" stroke-linecap="round"/>
+              <circle cx="2" cy="26" r="2.5" fill="#5DD8E8"/>
+              <circle cx="16" cy="6" r="2.5" fill="#9670FF"/>
+              <circle cx="30" cy="26" r="2.5" fill="#7C5CFF"/>
+            </g>
+            <text x="44" y="32" font-family="Inter Tight, system-ui, sans-serif" font-size="22" font-weight="600" letter-spacing="-0.03em" fill="currentColor">Flux<tspan font-weight="500" opacity="0.7">Compute</tspan></text>
+          </svg>
+          <div class="crn">on dark</div>
+        </div>
+        <div class="logo-card light">
+          <svg width="180" height="44" viewBox="0 0 200 48" aria-hidden="true">
+            <defs>
+              <linearGradient id="lg-l" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#3AB8C8"/><stop offset="100%" stop-color="#6244E6"/>
+              </linearGradient>
+            </defs>
+            <g transform="translate(4 8)">
+              <path d="M 2 26 C 8 26, 10 6, 16 6 C 22 6, 24 26, 30 26" fill="none" stroke="url(#lg-l)" stroke-width="3" stroke-linecap="round"/>
+              <circle cx="2" cy="26" r="2.5" fill="#3AB8C8"/>
+              <circle cx="16" cy="6" r="2.5" fill="#7A5AED"/>
+              <circle cx="30" cy="26" r="2.5" fill="#6244E6"/>
+            </g>
+            <text x="44" y="32" font-family="Inter Tight, system-ui, sans-serif" font-size="22" font-weight="600" letter-spacing="-0.03em" fill="currentColor">Flux<tspan font-weight="500" opacity="0.7">Compute</tspan></text>
+          </svg>
+          <div class="crn">on light</div>
+        </div>
+        <div class="logo-card flux" style="grid-column: span 2; aspect-ratio: 3.4;">
+          <svg width="56" height="40" viewBox="0 0 36 28" aria-hidden="true">
+            <g transform="translate(0 0)">
+              <path d="M 4 22 C 10 22, 12 4, 18 4 C 24 4, 26 22, 32 22" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+              <circle cx="4" cy="22" r="2.5" fill="currentColor"/>
+              <circle cx="18" cy="4" r="2.5" fill="currentColor"/>
+              <circle cx="32" cy="22" r="2.5" fill="currentColor"/>
+            </g>
+          </svg>
+          <div class="crn">mark only · monochrome</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 Color -->
+  <section>
+    <div class="section-head">
+      <div>
+        <div class="num">02 · Color</div>
+        <h2>Palette</h2>
+        <p>Two surfaces — ink and paper — with a single brand gradient. Status colors are deliberately muted; nothing screams.</p>
+      </div>
+      <div></div>
+    </div>
+
+    <div class="t-caps" style="margin-bottom: var(--s-3);">Surface · ink</div>
+    <div class="swatches">
+      <div class="sw"><div class="chip" style="background: var(--bg-0);"></div><div class="meta"><span class="name">bg-0</span><code>canvas</code></div></div>
+      <div class="sw"><div class="chip" style="background: var(--bg-1);"></div><div class="meta"><span class="name">bg-1</span><code>card</code></div></div>
+      <div class="sw"><div class="chip" style="background: var(--bg-2);"></div><div class="meta"><span class="name">bg-2</span><code>elevated</code></div></div>
+      <div class="sw"><div class="chip" style="background: var(--bg-3);"></div><div class="meta"><span class="name">bg-3</span><code>input · hover</code></div></div>
+    </div>
+
+    <div class="t-caps" style="margin: var(--s-6) 0 var(--s-3);">Foreground</div>
+    <div class="swatches">
+      <div class="sw"><div class="chip" style="background: var(--fg-0);"></div><div class="meta"><span class="name">fg-0</span><code>primary</code></div></div>
+      <div class="sw"><div class="chip" style="background: var(--fg-1);"></div><div class="meta"><span class="name">fg-1</span><code>secondary</code></div></div>
+      <div class="sw"><div class="chip" style="background: var(--fg-2);"></div><div class="meta"><span class="name">fg-2</span><code>tertiary</code></div></div>
+      <div class="sw"><div class="chip" style="background: var(--fg-3);"></div><div class="meta"><span class="name">fg-3</span><code>hint · disabled</code></div></div>
+    </div>
+
+    <div class="t-caps" style="margin: var(--s-6) 0 var(--s-3);">Accent · flux</div>
+    <div class="accent-row">
+      <div class="accent-tile">
+        <div class="label">flux-gradient</div>
+        <div>
+          <div class="name">cyan → violet</div>
+          <div class="stops" style="margin-top: var(--s-3);">
+            <span>oklch(78% 0.16 200)</span>
+            <span>→</span>
+            <span>oklch(62% 0.22 295)</span>
+          </div>
+        </div>
+      </div>
+      <div class="status-stack">
+        <div class="status-row"><span class="dot" style="color: var(--status-ok);"></span><span class="lbl">status · ok</span><code>--status-ok</code></div>
+        <div class="status-row"><span class="dot" style="color: var(--status-warn);"></span><span class="lbl">status · warn</span><code>--status-warn</code></div>
+        <div class="status-row"><span class="dot" style="color: var(--status-err);"></span><span class="lbl">status · err</span><code>--status-err</code></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 Type -->
+  <section>
+    <div class="section-head">
+      <div>
+        <div class="num">03 · Type</div>
+        <h2>Typography</h2>
+        <p>Inter Tight for everything human. JetBrains Mono for everything quantitative — latency, IDs, code, deploy hashes.</p>
+      </div>
+      <div></div>
+    </div>
+
+    <div class="type-stack">
+      <div class="type-row">
+        <div class="meta"><span class="nm">Display · 80 / 1.05 / -0.035em</span><span class="sz">Inter Tight 600</span></div>
+        <div class="sample" style="font: 600 var(--text-4xl)/var(--leading-tight) var(--font-sans); letter-spacing: var(--tracking-display);">Deploy any model.</div>
+      </div>
+      <div class="type-row">
+        <div class="meta"><span class="nm">H1 · 56 / 1.05</span><span class="sz">Inter Tight 600</span></div>
+        <div class="sample t-h1">Sub-second cold starts.</div>
+      </div>
+      <div class="type-row">
+        <div class="meta"><span class="nm">H2 · 40 / 1.05</span><span class="sz">Inter Tight 600</span></div>
+        <div class="sample t-h2">From git push to /v1/predict.</div>
+      </div>
+      <div class="type-row">
+        <div class="meta"><span class="nm">H3 · 28 / 1.25</span><span class="sz">Inter Tight 600</span></div>
+        <div class="sample t-h3">Bring your own container.</div>
+      </div>
+      <div class="type-row">
+        <div class="meta"><span class="nm">Body · 15 / 1.5</span><span class="sz">Inter Tight 400</span></div>
+        <div class="sample t-body" style="max-width: 60ch;">FluxCompute keeps a hot pool of GPUs warm against your traffic shape, scales to zero between bursts, and bills per token of compute used. No cluster, no kubectl, no quota tickets.</div>
+      </div>
+      <div class="type-row">
+        <div class="meta"><span class="nm">Small · 13 / 1.5</span><span class="sz">Inter Tight 400</span></div>
+        <div class="sample t-small">Available in 6 regions. SOC 2 Type II. PrivateLink on Pro.</div>
+      </div>
+      <div class="type-row">
+        <div class="meta"><span class="nm">Caps · 12 / 0.08em</span><span class="sz">Inter Tight 500</span></div>
+        <div class="sample t-caps">Section · label · eyebrow</div>
+      </div>
+      <div class="type-row">
+        <div class="meta"><span class="nm">Mono · 13 / 1.5</span><span class="sz">JetBrains Mono 500</span></div>
+        <div class="sample t-mono" style="color: var(--fg-1);">p50 = 340ms · p99 = 1.2s · req/s = 12,840 · region = us-west-2</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 Spacing & Radius -->
+  <section>
+    <div class="section-head">
+      <div>
+        <div class="num">04 · Spacing &amp; radius</div>
+        <h2>Rhythm</h2>
+        <p>8-unit base scale; corners stay tight (≤ 14px). Pills only for status and toggles.</p>
+      </div>
+      <div></div>
+    </div>
+
+    <div class="t-caps" style="margin-bottom: var(--s-4);">Space scale (px)</div>
+    <div class="scale">
+      <div class="step"><div class="bar" style="height: 4px;"></div><div class="lbl">s-1 · 4</div></div>
+      <div class="step"><div class="bar" style="height: 8px;"></div><div class="lbl">s-2 · 8</div></div>
+      <div class="step"><div class="bar" style="height: 12px;"></div><div class="lbl">s-3 · 12</div></div>
+      <div class="step"><div class="bar" style="height: 16px;"></div><div class="lbl">s-4 · 16</div></div>
+      <div class="step"><div class="bar" style="height: 24px;"></div><div class="lbl">s-5 · 24</div></div>
+      <div class="step"><div class="bar" style="height: 32px;"></div><div class="lbl">s-6 · 32</div></div>
+      <div class="step"><div class="bar" style="height: 48px;"></div><div class="lbl">s-7 · 48</div></div>
+      <div class="step"><div class="bar" style="height: 64px;"></div><div class="lbl">s-8 · 64</div></div>
+      <div class="step"><div class="bar" style="height: 96px;"></div><div class="lbl">s-9 · 96</div></div>
+      <div class="step"><div class="bar" style="height: 128px;"></div><div class="lbl">s-10 · 128</div></div>
+    </div>
+
+    <div class="t-caps" style="margin: var(--s-7) 0 var(--s-4);">Radius</div>
+    <div class="radii">
+      <div class="item" style="border-radius: var(--r-1);"><span class="nm">r-1</span><span>4</span></div>
+      <div class="item" style="border-radius: var(--r-2);"><span class="nm">r-2</span><span>6</span></div>
+      <div class="item" style="border-radius: var(--r-3);"><span class="nm">r-3</span><span>10</span></div>
+      <div class="item" style="border-radius: var(--r-4);"><span class="nm">r-4</span><span>14</span></div>
+      <div class="item" style="border-radius: var(--r-pill);"><span class="nm">r-pill</span><span>999</span></div>
+    </div>
+  </section>
+
+  <!-- 05 Components -->
+  <section>
+    <div class="section-head">
+      <div>
+        <div class="num">05 · Components</div>
+        <h2>Building blocks</h2>
+        <p>The handful of primitives that make up every screen. Compose; don't reinvent.</p>
+      </div>
+      <div></div>
+    </div>
+
+    <div class="components-grid">
+
+      <div class="demo">
+        <div class="demo-h"><span>buttons</span><span>.btn</span></div>
+        <div class="demo-b">
+          <button class="btn btn-flux">Deploy model →</button>
+          <button class="btn btn-primary">Continue</button>
+          <button class="btn btn-ghost">Documentation</button>
+          <button class="btn btn-flux btn-sm">Run</button>
+          <button class="btn btn-ghost btn-sm">Cancel</button>
+        </div>
+      </div>
+
+      <div class="demo">
+        <div class="demo-h"><span>badges</span><span>.badge</span></div>
+        <div class="demo-b">
+          <span class="badge badge-flux badge-dot">live</span>
+          <span class="badge badge-ok badge-dot">healthy</span>
+          <span class="badge badge-warn badge-dot">degraded</span>
+          <span class="badge badge-err badge-dot">503</span>
+          <span class="badge">a100-80g</span>
+          <span class="badge">v1.4.2</span>
+        </div>
+      </div>
+
+      <div class="demo">
+        <div class="demo-h"><span>inputs</span><span>.input</span></div>
+        <div class="demo-b col">
+          <input class="input" placeholder="model name…" value="llama-3.1-70b-instruct"/>
+          <input class="input" placeholder="HF_TOKEN" type="password" value="hf_••••••••••••••••"/>
+          <input class="input" placeholder="empty state"/>
+        </div>
+      </div>
+
+      <div class="demo">
+        <div class="demo-h"><span>code</span><span>.code</span></div>
+        <div class="demo-b col">
+<pre class="code" style="margin:0;"><span class="c"># deploy a HF model</span>
+<span class="k">from</span> flux <span class="k">import</span> Endpoint
+
+ep = Endpoint.<span class="f">create</span>(
+  model=<span class="s">"meta-llama/Llama-3.1-70B"</span>,
+  gpu=<span class="s">"a100-80g"</span>,
+  scale_to_zero=<span class="n">True</span>,
+)
+<span class="f">print</span>(ep.url)  <span class="c"># https://flux.run/m/abc123</span></pre>
+        </div>
+      </div>
+
+      <div class="demo" style="grid-column: span 2;">
+        <div class="demo-h"><span>endpoint card · signature</span><span>.endpoint</span></div>
+        <div class="demo-b col" style="padding: var(--s-5);">
+          <div class="endpoint">
+            <div class="head">
+              <div>
+                <div style="display:flex; gap: var(--s-2); align-items: center; margin-bottom: 4px;">
+                  <span class="badge badge-flux badge-dot">live</span>
+                  <span class="badge">a100-80g</span>
+                  <span class="badge">us-west-2</span>
+                </div>
+                <h3 class="title">llama-3.1-70b-instruct</h3>
+                <div class="sub">flux.run/m/llama70b · deployed 4h ago · v1.4.2</div>
+              </div>
+              <div style="display:flex; gap: var(--s-2);">
+                <button class="btn btn-ghost btn-sm">Logs</button>
+                <button class="btn btn-flux btn-sm">Open playground</button>
+              </div>
+            </div>
+            <!-- spark -->
+            <svg class="spark" viewBox="0 0 400 28" preserveAspectRatio="none" aria-hidden="true">
+              <defs>
+                <linearGradient id="spark-g" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#5DD8E8"/><stop offset="100%" stop-color="#7C5CFF"/>
+                </linearGradient>
+                <linearGradient id="spark-fill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#7C5CFF" stop-opacity="0.25"/>
+                  <stop offset="100%" stop-color="#7C5CFF" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <path d="M 0 22 L 20 20 L 40 18 L 60 21 L 80 14 L 100 17 L 120 9 L 140 12 L 160 6 L 180 10 L 200 8 L 220 13 L 240 7 L 260 11 L 280 5 L 300 9 L 320 4 L 340 8 L 360 3 L 380 6 L 400 5 L 400 28 L 0 28 Z" fill="url(#spark-fill)"/>
+              <path d="M 0 22 L 20 20 L 40 18 L 60 21 L 80 14 L 100 17 L 120 9 L 140 12 L 160 6 L 180 10 L 200 8 L 220 13 L 240 7 L 260 11 L 280 5 L 300 9 L 320 4 L 340 8 L 360 3 L 380 6 L 400 5" fill="none" stroke="url(#spark-g)" stroke-width="1.5"/>
+            </svg>
+            <div class="stats">
+              <div class="stat"><span class="k">p50</span><span class="v">340<span class="unit">ms</span></span></div>
+              <div class="stat"><span class="k">p99</span><span class="v">1.2<span class="unit">s</span></span></div>
+              <div class="stat"><span class="k">req/s</span><span class="v">12,840</span></div>
+              <div class="stat"><span class="k">cost · 24h</span><span class="v">$84.20</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <section style="border-bottom: 0; padding-bottom: 0;">
+    <div style="display:flex; justify-content: space-between; align-items: center; padding-top: var(--s-6); border-top: 1px solid var(--line-1);">
+      <div class="footnote">tokens.css · logo.svg · skill.md</div>
+      <div class="footnote">FluxCompute · v0.1 · 2025</div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  // theme toggle
+  const root = document.documentElement;
+  const btns = document.querySelectorAll('[data-theme-set]');
+  const setTheme = (t) => {
+    root.dataset.theme = t;
+    btns.forEach(b => b.setAttribute('aria-pressed', b.dataset.themeSet === t ? 'true' : 'false'));
+    try { localStorage.setItem('flux-theme', t); } catch (e) {}
+  };
+  btns.forEach(b => b.addEventListener('click', () => setTheme(b.dataset.themeSet)));
+  try {
+    const saved = localStorage.getItem('flux-theme');
+    if (saved) setTheme(saved);
+  } catch (e) {}
+</script>
+
+</body>
+</html>
